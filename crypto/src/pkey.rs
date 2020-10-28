@@ -9,15 +9,16 @@ use std::{
     result::Result,
 };
 
-use openssl::{hash, pkey, rsa, sign};
+use openssl::{hash, pkey::{self, Private, Public}, rsa::{self, Rsa}, sign};
 
 use opcua_types::status_code::StatusCode;
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub enum RsaPadding {
     PKCS1,
     OAEP,
-    PSS
+    OAEP_SHA256,
+    PSS,
 }
 
 impl Into<rsa::Padding> for RsaPadding {
@@ -25,7 +26,10 @@ impl Into<rsa::Padding> for RsaPadding {
         match self {
             RsaPadding::PKCS1 => rsa::Padding::PKCS1,
             RsaPadding::OAEP => rsa::Padding::PKCS1_OAEP,
-            RsaPadding::PSS => rsa::Padding::PKCS1_PSS
+            RsaPadding::PSS => rsa::Padding::PKCS1_PSS,
+            // This is wrong, but it must be handled by special case in the code
+            RsaPadding::OAEP_SHA256 => rsa::Padding::PKCS1_OAEP,
+            _ => panic!("Unsupported conversion to rsa::Padding")
         }
     }
 }
@@ -71,7 +75,8 @@ pub trait KeySize {
         match padding {
             RsaPadding::PKCS1 => self.size() - 11,
             RsaPadding::OAEP => self.size() - 42,
-            RsaPadding::PSS => panic!(), // PSS is for signing not encryption
+            RsaPadding::OAEP_SHA256 => self.size() - 66,
+            _ => panic!("Unsupported padding")
         }
     }
 
@@ -158,6 +163,7 @@ impl PrivateKey {
         // decrypt data using our private key
         let cipher_text_block_size = self.cipher_text_block_size();
         let rsa = self.value.rsa().unwrap();
+        let is_oaep_sha256 = padding == RsaPadding::OAEP_SHA256;
         let rsa_padding: rsa::Padding = padding.into();
 
         // Decrypt the data
@@ -170,10 +176,15 @@ impl PrivateKey {
             dst_idx += {
                 let src = &src[src_idx..(src_idx + cipher_text_block_size)];
                 let dst = &mut dst[dst_idx..(dst_idx + cipher_text_block_size)];
-                rsa.private_decrypt(src, dst, rsa_padding)
-                    .map_err(|err| {
-                        error!("Decryption failed for key size {}, src idx {}, dst idx {}, padding {:?}, error - {:?}", cipher_text_block_size, src_idx, dst_idx, padding, err);
-                    })?
+
+                if is_oaep_sha256 {
+                    decrypt_oaep_sha256(&rsa, src, dst)?
+                } else {
+                    rsa.private_decrypt(src, dst, rsa_padding)
+                        .map_err(|err| {
+                            error!("Decryption failed for key size {}, src idx {}, dst idx {}, padding {:?}, error - {:?}", cipher_text_block_size, src_idx, dst_idx, padding, err);
+                        })?
+                }
             };
             src_idx += cipher_text_block_size;
         }
@@ -238,6 +249,7 @@ impl PublicKey {
         //
         // https://www.openssl.org/docs/man1.0.2/crypto/RSA_public_encrypt.html
         let rsa = self.value.rsa().unwrap();
+        let is_oaep_sha256 = padding == RsaPadding::OAEP_SHA256;
         let padding: rsa::Padding = padding.into();
 
         // Encrypt the data in chunks no larger than the key size less padding
@@ -258,10 +270,15 @@ impl PublicKey {
             dst_idx += {
                 let src = &src[src_idx..(src_idx + bytes_to_encrypt)];
                 let dst = &mut dst[dst_idx..(dst_idx + cipher_text_block_size)];
-                rsa.public_encrypt(src, dst, padding)
-                    .map_err(|err| {
-                        error!("Encryption failed for bytes_to_encrypt {}, key_size {}, src_idx {}, dst_idx {} error - {:?}", bytes_to_encrypt, cipher_text_block_size, src_idx, dst_idx, err);
-                    })?
+
+                if is_oaep_sha256 {
+                    encrypt_oaep_sha256(&rsa, src, dst)?
+                } else {
+                    rsa.public_encrypt(src, dst, padding)
+                        .map_err(|err| {
+                            error!("Encryption failed for bytes_to_encrypt {}, key_size {}, src_idx {}, dst_idx {} error - {:?}", bytes_to_encrypt, cipher_text_block_size, src_idx, dst_idx, err);
+                        })?
+                }
             };
 
             // Src advances by bytes to encrypt
@@ -270,4 +287,48 @@ impl PublicKey {
 
         Ok(dst_idx)
     }
+}
+
+/// Special case implementation uses OAEP with SHA256
+fn decrypt_oaep_sha256(pkey: &Rsa<Private>, from: &[u8], to: &mut [u8]) -> Result<usize, ()> {
+    use openssl_sys::*;
+    use std::ptr;
+
+    let mut result = Err(());
+    unsafe {
+        // https://stackoverflow.com/questions/17784022/how-to-encrypt-data-using-rsa-with-sha-256-as-hash-function-and-mgf1-as-mask-ge
+        let bioPrivKey = BIO_new(BIO_s_mem());
+        if !bioPrivKey.is_null() {
+            if PEM_write_bio_RSAPrivateKey(bioPrivKey, pkey.as_ptr(), ptr::null(), ptr::null_mut(), 0, None, ptr::null_mut()) {
+                let privKey = PEM_read_bio_PrivateKey(bioPrivKey, ptr::null_mut(), None, ptr::null_mut());
+                if !privKey.is_null() {
+                    let ctx = EVP_PKEY_CTX_new(privKey, ptr::null_mut());
+                    EVP_PKEY_free(privKey);
+
+                    if !ctx.is_null() {
+
+                        EVP_PKEY_CTX_set_rsa_padding(ctx, pad: c_int) -> c_int {
+                        EVP_PKEY_CTX_ctrl_str(ctx, "rsa_oaep_md", "sha256");
+                        EVP_PKEY_CTX_ctrl_str(ctx, "rsa_mgf1_md", "sha256");
+
+                        let mut outLen: size_t = to.size();
+                        let ret = EVP_PKEY_decrypt(ctx, dataOut, &mut outLen, dataIn, from.size());
+                        if ret > 0 && outLen > 0 {
+                            result = Ok(outLen as usize);
+                        }
+                        EVP_PKEY_CTX_free(ctx);
+                    }
+                }
+            }
+            BIO_free_all(bioPrivKey);
+        }
+    }
+    result
+}
+
+/// Special case implementation uses OAEP with SHA256
+fn encrypt_oaep_sha256(pkey: &Rsa<Public>, from: &[u8], to: &mut [u8]) -> Result<usize, ()> {
+    // TODO special case for OAEP_SHA256
+    // https://stackoverflow.com/questions/17784022/how-to-encrypt-data-using-rsa-with-sha-256-as-hash-function-and-mgf1-as-mask-ge
+    Err(())
 }

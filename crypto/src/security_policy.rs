@@ -4,14 +4,16 @@
 
 //! Security policy is the symmetric, asymmetric encryption / decryption + signing / verification
 //! algorithms to use and enforce for the current session.
+use std::fmt;
+use std::str::FromStr;
+
+use openssl::hash as openssl_hash;
+
 use opcua_types::{
     ByteString,
     constants,
     status_code::StatusCode,
 };
-use openssl::hash as openssl_hash;
-use std::fmt;
-use std::str::FromStr;
 
 use crate::{
     aeskey::AesKey,
@@ -222,8 +224,7 @@ impl SecurityPolicy {
     pub fn is_supported(&self) -> bool {
         match self {
             SecurityPolicy::None | SecurityPolicy::Basic128Rsa15 | SecurityPolicy::Basic256 |
-            SecurityPolicy::Basic256Sha256 | SecurityPolicy::Aes128Sha256RsaOaep => true,
-            // | SecurityPolicy::Aes256Sha256RsaPss
+            SecurityPolicy::Basic256Sha256 | SecurityPolicy::Aes128Sha256RsaOaep | SecurityPolicy::Aes256Sha256RsaPss => true,
             _ => false
         }
     }
@@ -499,8 +500,9 @@ impl SecurityPolicy {
     pub fn asymmetric_encryption_padding(&self) -> RsaPadding {
         match self {
             SecurityPolicy::Basic128Rsa15 => RsaPadding::PKCS1,
-            SecurityPolicy::Basic256 | SecurityPolicy::Basic256Sha256 | SecurityPolicy::Aes128Sha256RsaOaep |
-            SecurityPolicy::Aes256Sha256RsaPss => RsaPadding::OAEP,
+            SecurityPolicy::Basic256 | SecurityPolicy::Basic256Sha256 | SecurityPolicy::Aes128Sha256RsaOaep => RsaPadding::OAEP,
+            // PSS uses OAEP-SHA256 for encryption, but PSS for signing
+            SecurityPolicy::Aes256Sha256RsaPss => RsaPadding::OAEP_SHA256,
             _ => {
                 panic!("Security policy is not supported, shouldn't have gotten here");
             }
