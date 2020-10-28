@@ -142,17 +142,17 @@ impl PrivateKey {
     }
 
     /// Signs the data using RSA-SHA1
-    pub fn sign_hmac_sha1(&self, data: &[u8], signature: &mut [u8]) -> Result<usize, StatusCode> {
+    pub fn sign_sha1(&self, data: &[u8], signature: &mut [u8]) -> Result<usize, StatusCode> {
         self.sign(hash::MessageDigest::sha1(), data, signature, RsaPadding::Pkcs1)
     }
 
     /// Signs the data using RSA-SHA256
-    pub fn sign_hmac_sha256(&self, data: &[u8], signature: &mut [u8]) -> Result<usize, StatusCode> {
+    pub fn sign_sha256(&self, data: &[u8], signature: &mut [u8]) -> Result<usize, StatusCode> {
         self.sign(hash::MessageDigest::sha256(), data, signature, RsaPadding::Pkcs1)
     }
 
     /// Signs the data using RSA-SHA256-PSS
-    pub fn sign_hmac_sha256_pss(&self, data: &[u8], signature: &mut [u8]) -> Result<usize, StatusCode> {
+    pub fn sign_sha256_pss(&self, data: &[u8], signature: &mut [u8]) -> Result<usize, StatusCode> {
         self.sign(hash::MessageDigest::sha256(), data, signature, RsaPadding::Pss)
     }
 
@@ -223,17 +223,17 @@ impl PublicKey {
     }
 
     /// Verifies the data using RSA-SHA1
-    pub fn verify_hmac_sha1(&self, data: &[u8], signature: &[u8]) -> Result<bool, StatusCode> {
+    pub fn verify_sha1(&self, data: &[u8], signature: &[u8]) -> Result<bool, StatusCode> {
         self.verify(hash::MessageDigest::sha1(), data, signature, RsaPadding::Pkcs1)
     }
 
     /// Verifies the data using RSA-SHA256
-    pub fn verify_hmac_sha256(&self, data: &[u8], signature: &[u8]) -> Result<bool, StatusCode> {
+    pub fn verify_sha256(&self, data: &[u8], signature: &[u8]) -> Result<bool, StatusCode> {
         self.verify(hash::MessageDigest::sha256(), data, signature, RsaPadding::Pkcs1)
     }
 
     /// Verifies the data using RSA-SHA256-PSS
-    pub fn verify_hmac_sha256_pss(&self, data: &[u8], signature: &[u8]) -> Result<bool, StatusCode> {
+    pub fn verify_sha256_pss(&self, data: &[u8], signature: &[u8]) -> Result<bool, StatusCode> {
         self.verify(hash::MessageDigest::sha256(), data, signature, RsaPadding::Pss)
     }
 
