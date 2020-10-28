@@ -15,20 +15,20 @@ use opcua_types::status_code::StatusCode;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum RsaPadding {
-    PKCS1,
-    OAEP,
-    OAEP_SHA256,
-    PSS,
+    Pkcs1,
+    Oaep,
+    OaepSha256,
+    Pss,
 }
 
 impl Into<rsa::Padding> for RsaPadding {
     fn into(self) -> rsa::Padding {
         match self {
-            RsaPadding::PKCS1 => rsa::Padding::PKCS1,
-            RsaPadding::OAEP => rsa::Padding::PKCS1_OAEP,
-            RsaPadding::PSS => rsa::Padding::PKCS1_PSS,
+            RsaPadding::Pkcs1 => rsa::Padding::PKCS1,
+            RsaPadding::Oaep => rsa::Padding::PKCS1_OAEP,
+            RsaPadding::Pss => rsa::Padding::PKCS1_PSS,
             // This is right, but it must be handled by special case in the code
-            RsaPadding::OAEP_SHA256 => rsa::Padding::PKCS1_OAEP,
+            RsaPadding::OaepSha256 => rsa::Padding::PKCS1_OAEP,
         }
     }
 }
@@ -72,9 +72,9 @@ pub trait KeySize {
         // not more than RSA_size(rsa) - 42 for RSA_PKCS1_OAEP_PADDING and exactly RSA_size(rsa)
         // for RSA_NO_PADDING.
         match padding {
-            RsaPadding::PKCS1 => self.size() - 11,
-            RsaPadding::OAEP => self.size() - 42,
-            RsaPadding::OAEP_SHA256 => self.size() - 66,
+            RsaPadding::Pkcs1 => self.size() - 11,
+            RsaPadding::Oaep => self.size() - 42,
+            RsaPadding::OaepSha256 => self.size() - 66,
             _ => panic!("Unsupported padding")
         }
     }
@@ -143,17 +143,17 @@ impl PrivateKey {
 
     /// Signs the data using RSA-SHA1
     pub fn sign_hmac_sha1(&self, data: &[u8], signature: &mut [u8]) -> Result<usize, StatusCode> {
-        self.sign(hash::MessageDigest::sha1(), data, signature, RsaPadding::PKCS1)
+        self.sign(hash::MessageDigest::sha1(), data, signature, RsaPadding::Pkcs1)
     }
 
     /// Signs the data using RSA-SHA256
     pub fn sign_hmac_sha256(&self, data: &[u8], signature: &mut [u8]) -> Result<usize, StatusCode> {
-        self.sign(hash::MessageDigest::sha256(), data, signature, RsaPadding::PKCS1)
+        self.sign(hash::MessageDigest::sha256(), data, signature, RsaPadding::Pkcs1)
     }
 
     /// Signs the data using RSA-SHA256-PSS
     pub fn sign_hmac_sha256_pss(&self, data: &[u8], signature: &mut [u8]) -> Result<usize, StatusCode> {
-        self.sign(hash::MessageDigest::sha256(), data, signature, RsaPadding::PSS)
+        self.sign(hash::MessageDigest::sha256(), data, signature, RsaPadding::Pss)
     }
 
     /// Decrypts data in src to dst using the specified padding and returning the size of the decrypted
@@ -162,7 +162,7 @@ impl PrivateKey {
         // decrypt data using our private key
         let cipher_text_block_size = self.cipher_text_block_size();
         let rsa = self.value.rsa().unwrap();
-        let is_oaep_sha256 = padding == RsaPadding::OAEP_SHA256;
+        let is_oaep_sha256 = padding == RsaPadding::OaepSha256;
         let rsa_padding: rsa::Padding = padding.into();
 
         // Decrypt the data
@@ -225,17 +225,17 @@ impl PublicKey {
 
     /// Verifies the data using RSA-SHA1
     pub fn verify_hmac_sha1(&self, data: &[u8], signature: &[u8]) -> Result<bool, StatusCode> {
-        self.verify(hash::MessageDigest::sha1(), data, signature, RsaPadding::PKCS1)
+        self.verify(hash::MessageDigest::sha1(), data, signature, RsaPadding::Pkcs1)
     }
 
     /// Verifies the data using RSA-SHA256
     pub fn verify_hmac_sha256(&self, data: &[u8], signature: &[u8]) -> Result<bool, StatusCode> {
-        self.verify(hash::MessageDigest::sha256(), data, signature, RsaPadding::PKCS1)
+        self.verify(hash::MessageDigest::sha256(), data, signature, RsaPadding::Pkcs1)
     }
 
     /// Verifies the data using RSA-SHA256-PSS
     pub fn verify_hmac_sha256_pss(&self, data: &[u8], signature: &[u8]) -> Result<bool, StatusCode> {
-        self.verify(hash::MessageDigest::sha256(), data, signature, RsaPadding::PSS)
+        self.verify(hash::MessageDigest::sha256(), data, signature, RsaPadding::Pss)
     }
 
     /// Encrypts data from src to dst using the specified padding and returns the size of encrypted
@@ -248,7 +248,7 @@ impl PublicKey {
         //
         // https://www.openssl.org/docs/man1.0.2/crypto/RSA_public_encrypt.html
         let rsa = self.value.rsa().unwrap();
-        let is_oaep_sha256 = padding == RsaPadding::OAEP_SHA256;
+        let is_oaep_sha256 = padding == RsaPadding::OaepSha256;
         let padding: rsa::Padding = padding.into();
 
         // Encrypt the data in chunks no larger than the key size less padding
