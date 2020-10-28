@@ -177,7 +177,10 @@ impl PrivateKey {
                 let dst = &mut dst[dst_idx..(dst_idx + cipher_text_block_size)];
 
                 if is_oaep_sha256 {
-                    oaep_sha256::decrypt(&rsa, src, dst)?
+                    oaep_sha256::decrypt(&rsa, src, dst)
+                        .map_err(|_| {
+                            error!("Decryption OAEP-SHA2 failed for key size {}, src idx {}, dst idx {}, padding {:?}", cipher_text_block_size, src_idx, dst_idx, padding);
+                        })?
                 } else {
                     rsa.private_decrypt(src, dst, rsa_padding)
                         .map_err(|err| {
@@ -271,7 +274,10 @@ impl PublicKey {
                 let dst = &mut dst[dst_idx..(dst_idx + cipher_text_block_size)];
 
                 if is_oaep_sha256 {
-                    oaep_sha256::encrypt(&rsa, src, dst)?
+                    oaep_sha256::encrypt(&rsa, src, dst)
+                        .map_err(|_| {
+                            error!("Encryption OAEP-SHA2 failed for bytes_to_encrypt {}, key_size {}, src_idx {}, dst_idx {}", bytes_to_encrypt, cipher_text_block_size, src_idx, dst_idx);
+                        })?
                 } else {
                     rsa.public_encrypt(src, dst, padding)
                         .map_err(|err| {
@@ -294,7 +300,7 @@ impl PublicKey {
 mod oaep_sha256 {
     use std::ptr;
 
-    use foreign_types::{ForeignType, ForeignTypeRef};
+    use foreign_types::ForeignType;
     use libc::*;
     use openssl::{pkey::{Private, Public}, rsa::{self, Rsa}};
     use openssl_sys::*;
@@ -361,11 +367,23 @@ mod oaep_sha256 {
                             if ret > 0 && out_len > 0 {
                                 result = Ok(out_len as usize);
                             }
+                            else {
+                                trace!("oaep_sha256::encrypt failed to encrypt bytes, ret = {}, out_len = {}", ret, out_len);
+                            }
                             EVP_PKEY_CTX_free(ctx);
                         }
+                        else {
+                            trace!("oaep_sha256::encrypt failed to create pkey ctx");
+                        }
+                    }
+                    else {
+                        trace!("oaep_sha256::encrypt failed to read public key");
                     }
                 }
                 BIO_free_all(bio_pub_key);
+            }
+            else {
+                trace!("oaep_sha256::encrypt failed to call BIO_new");
             }
         }
         result

@@ -1,8 +1,9 @@
 extern crate rustc_serialize as serialize;
 
-use opcua_types::status_code::StatusCode;
 use std::fs::File;
 use std::io::Write;
+
+use opcua_types::status_code::StatusCode;
 
 use crate::{
     aeskey::AesKey, certificate_store::*, pkey::{KeySize, PrivateKey, RsaPadding},
@@ -180,12 +181,13 @@ fn test_asymmetric_encrypt_and_decrypt(cert: &X509, key: &PrivateKey, security_p
     let mut ciphertext = vec![0u8; plaintext_size + 4096];
     let mut plaintext2 = vec![0u8; plaintext_size + 4096];
 
-    trace!("Encrypting data of length {}", plaintext_size);
+    println!("Encrypt with security policy {:?}", security_policy);
+    println!("Encrypting data of length {}", plaintext_size);
     let encrypted_size = security_policy.asymmetric_encrypt(&cert.public_key().unwrap(), &plaintext, &mut ciphertext).unwrap();
-    trace!("Encrypted size = {}", encrypted_size);
-    trace!("Decrypting cipher text back");
+    println!("Encrypted size = {}", encrypted_size);
+    println!("Decrypting cipher text back");
     let decrypted_size = security_policy.asymmetric_decrypt(key, &ciphertext[..encrypted_size], &mut plaintext2).unwrap();
-    trace!("Decrypted size = {}", decrypted_size);
+    println!("Decrypted size = {}", decrypted_size);
 
     assert_eq!(plaintext_size, decrypted_size);
     assert_eq!(&plaintext[..], &plaintext2[..decrypted_size]);
@@ -194,9 +196,17 @@ fn test_asymmetric_encrypt_and_decrypt(cert: &X509, key: &PrivateKey, security_p
 
 #[test]
 fn asymmetric_encrypt_and_decrypt() {
+    opcua_console_logging::init();
+
     let (cert, key) = make_test_cert_2048();
     // Try all security policies, ensure they encrypt / decrypt for various sizes
-    for security_policy in &[SecurityPolicy::Basic128Rsa15, SecurityPolicy::Basic256, SecurityPolicy::Basic256Sha256] {
+    for security_policy in &[
+        SecurityPolicy::Basic128Rsa15,
+        SecurityPolicy::Basic256,
+        SecurityPolicy::Basic256Sha256,
+        SecurityPolicy::Aes128Sha256RsaOaep,
+        SecurityPolicy::Aes256Sha256RsaPss
+    ] {
         for data_size in &[0, 1, 127, 128, 129, 255, 256, 257, 13001] {
             test_asymmetric_encrypt_and_decrypt(&cert, &key, *security_policy, *data_size);
         }
@@ -224,6 +234,15 @@ fn calculate_cipher_text_size() {
     assert_eq!(pkey.calculate_cipher_text_size(255, padding), 512);
     assert_eq!(pkey.calculate_cipher_text_size(256, padding), 512);
     assert_eq!(pkey.calculate_cipher_text_size(512, padding), 768);
+
+    // Testing -66 bounds
+    let padding = RsaPadding::OaepSha256;
+    assert_eq!(pkey.calculate_cipher_text_size(1, padding), 256);
+    assert_eq!(pkey.calculate_cipher_text_size(190, padding), 256);
+    assert_eq!(pkey.calculate_cipher_text_size(191, padding), 512);
+    assert_eq!(pkey.calculate_cipher_text_size(255, padding), 512);
+    assert_eq!(pkey.calculate_cipher_text_size(256, padding), 512);
+    assert_eq!(pkey.calculate_cipher_text_size(512, padding), 768);
 }
 
 #[test]
@@ -233,7 +252,7 @@ fn calculate_cipher_text_size2() {
 
     // The cipher text size function should report exactly the same value as the value returned
     // by encrypting bytes. This is especially important on boundary values.
-    for padding in &[RsaPadding::Pkcs1, RsaPadding::Oaep] {
+    for padding in &[RsaPadding::Pkcs1, RsaPadding::Oaep, RsaPadding::OaepSha256] {
         for src_len in 1..550 {
             let src = vec![127u8; src_len];
 
