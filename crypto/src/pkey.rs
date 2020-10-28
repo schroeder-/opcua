@@ -178,15 +178,11 @@ impl PrivateKey {
 
                 if is_oaep_sha256 {
                     oaep_sha256::decrypt(&rsa, src, dst)
-                        .map_err(|_| {
-                            error!("Decryption OAEP-SHA2 failed for key size {}, src idx {}, dst idx {}, padding {:?}", cipher_text_block_size, src_idx, dst_idx, padding);
-                        })?
                 } else {
                     rsa.private_decrypt(src, dst, rsa_padding)
-                        .map_err(|err| {
-                            error!("Decryption failed for key size {}, src idx {}, dst idx {}, padding {:?}, error - {:?}", cipher_text_block_size, src_idx, dst_idx, padding, err);
-                        })?
-                }
+                }.map_err(|err| {
+                    error!("Decryption failed for key size {}, src idx {}, dst idx {}, padding {:?}, error - {:?}", cipher_text_block_size, src_idx, dst_idx, padding, err);
+                })?
             };
             src_idx += cipher_text_block_size;
         }
@@ -275,15 +271,12 @@ impl PublicKey {
 
                 if is_oaep_sha256 {
                     oaep_sha256::encrypt(&rsa, src, dst)
-                        .map_err(|_| {
-                            error!("Encryption OAEP-SHA2 failed for bytes_to_encrypt {}, key_size {}, src_idx {}, dst_idx {}", bytes_to_encrypt, cipher_text_block_size, src_idx, dst_idx);
-                        })?
                 } else {
                     rsa.public_encrypt(src, dst, padding)
-                        .map_err(|err| {
-                            error!("Encryption failed for bytes_to_encrypt {}, key_size {}, src_idx {}, dst_idx {} error - {:?}", bytes_to_encrypt, cipher_text_block_size, src_idx, dst_idx, err);
-                        })?
-                }
+                }.map_err(|err| {
+                    error!("Encryption failed for bytes_to_encrypt {}, src len {}, src_idx {}, dst len {}, dst_idx {}, cipher_text_block_size {}, plain_text_block_size {}, error - {:?}",
+                           bytes_to_encrypt, src.len(), src_idx, dst.len(), dst_idx, cipher_text_block_size, plain_text_block_size, err);
+                })?
             };
 
             // Src advances by bytes to encrypt
@@ -300,10 +293,10 @@ impl PublicKey {
 mod oaep_sha256 {
     use std::ptr;
 
-    use foreign_types::ForeignType;
+    use foreign_types::{ForeignType};
     use libc::*;
-    use openssl::{pkey::{Private, Public}, rsa::{self, Rsa}};
-    use openssl_sys::*;
+    use openssl::{error, pkey::{Private, Public}, rsa::{self, Rsa}};
+    use openssl_sys::{*};
 
     // This sets up the context for encrypting / decrypting with OAEP + SHA256
     unsafe fn set_evp_ctrl_oaep_sha256(ctx: *mut EVP_PKEY_CTX) {
@@ -316,74 +309,68 @@ mod oaep_sha256 {
     }
 
     /// Special case implementation uses OAEP with SHA256
-    pub fn decrypt(pkey: &Rsa<Private>, from: &[u8], to: &mut [u8]) -> Result<usize, ()> {
-        let mut result = Err(());
+    pub fn decrypt(pkey: &Rsa<Private>, from: &[u8], to: &mut [u8]) -> Result<usize, error::ErrorStack> {
+        let result;
         unsafe {
-            let bio_priv_key = BIO_new(BIO_s_mem());
-            if !bio_priv_key.is_null() {
-                if PEM_write_bio_RSAPrivateKey(bio_priv_key, pkey.as_ptr(), ptr::null(), ptr::null_mut(), 0, None, ptr::null_mut()) > 0 {
-                    let priv_key = PEM_read_bio_PrivateKey(bio_priv_key, ptr::null_mut(), None, ptr::null_mut());
-                    if !priv_key.is_null() {
-                        let ctx = EVP_PKEY_CTX_new(priv_key, ptr::null_mut());
-                        EVP_PKEY_free(priv_key);
+            let priv_key = EVP_PKEY_new();
+            if !priv_key.is_null() {
+                EVP_PKEY_set1_RSA(priv_key, pkey.as_ptr());
+                let ctx = EVP_PKEY_CTX_new(priv_key, ptr::null_mut());
+                EVP_PKEY_free(priv_key);
 
-                        if !ctx.is_null() {
-                            let _ret = EVP_PKEY_decrypt_init(ctx);
-                            set_evp_ctrl_oaep_sha256(ctx);
+                if !ctx.is_null() {
+                    let _ret = EVP_PKEY_decrypt_init(ctx);
+                    set_evp_ctrl_oaep_sha256(ctx);
 
-                            let mut out_len: size_t = to.len();
-                            let ret = EVP_PKEY_decrypt(ctx, to.as_mut_ptr(), &mut out_len, from.as_ptr(), from.len());
-                            if ret > 0 && out_len > 0 {
-                                result = Ok(out_len as usize);
-                            }
-                            EVP_PKEY_CTX_free(ctx);
-                        }
+                    let mut out_len: size_t = to.len();
+                    let ret = EVP_PKEY_decrypt(ctx, to.as_mut_ptr(), &mut out_len, from.as_ptr(), from.len());
+                    if ret > 0 && out_len > 0 {
+                        result = Ok(out_len as usize);
+                    } else {
+                        result = Err(error::ErrorStack::get());
                     }
+                    EVP_PKEY_CTX_free(ctx);
+                } else {
+                    result = Err(error::ErrorStack::get());
                 }
-                BIO_free_all(bio_priv_key);
+            } else {
+                result = Err(error::ErrorStack::get());
             }
         }
+
         result
     }
 
     /// Special case implementation uses OAEP with SHA256
-    pub fn encrypt(pkey: &Rsa<Public>, from: &[u8], to: &mut [u8]) -> Result<usize, ()> {
-        let mut result = Err(());
+    pub fn encrypt(pkey: &Rsa<Public>, from: &[u8], to: &mut [u8]) -> Result<usize, error::ErrorStack> {
+        let result;
         unsafe {
-            let bio_pub_key = BIO_new(BIO_s_mem());
-            if !bio_pub_key.is_null() {
-                if PEM_write_bio_RSAPublicKey(bio_pub_key, pkey.as_ptr()) > 0 {
-                    let pub_key = PEM_read_bio_PUBKEY(bio_pub_key, ptr::null_mut(), None, ptr::null_mut());
-                    if !pub_key.is_null() {
-                        let ctx = EVP_PKEY_CTX_new(pub_key, ptr::null_mut());
-                        EVP_PKEY_free(pub_key);
+            let pub_key = EVP_PKEY_new();
+            if !pub_key.is_null() {
+                EVP_PKEY_set1_RSA(pub_key, pkey.as_ptr());
+                let ctx = EVP_PKEY_CTX_new(pub_key, ptr::null_mut());
+                EVP_PKEY_free(pub_key);
 
-                        if !ctx.is_null() {
-                            let _ret = EVP_PKEY_encrypt_init(ctx);
-                            set_evp_ctrl_oaep_sha256(ctx);
+                if !ctx.is_null() {
+                    let _ret = EVP_PKEY_encrypt_init(ctx);
+                    set_evp_ctrl_oaep_sha256(ctx);
 
-                            let mut out_len: size_t = to.len();
-                            let ret = EVP_PKEY_encrypt(ctx, to.as_mut_ptr(), &mut out_len, from.as_ptr(), from.len());
-                            if ret > 0 && out_len > 0 {
-                                result = Ok(out_len as usize);
-                            }
-                            else {
-                                trace!("oaep_sha256::encrypt failed to encrypt bytes, ret = {}, out_len = {}", ret, out_len);
-                            }
-                            EVP_PKEY_CTX_free(ctx);
-                        }
-                        else {
-                            trace!("oaep_sha256::encrypt failed to create pkey ctx");
-                        }
+                    let mut out_len: size_t = to.len();
+                    let ret = EVP_PKEY_encrypt(ctx, to.as_mut_ptr(), &mut out_len, from.as_ptr(), from.len());
+                    if ret > 0 && out_len > 0 {
+                        result = Ok(out_len as usize);
+                    } else {
+                        trace!("oaep_sha256::encrypt EVP_PKEY_encrypt, ret = {}, out_len = {}", ret, out_len);
+                        result = Err(error::ErrorStack::get());
                     }
-                    else {
-                        trace!("oaep_sha256::encrypt failed to read public key");
-                    }
+                    EVP_PKEY_CTX_free(ctx);
+                } else {
+                    trace!("oaep_sha256::encrypt EVP_PKEY_CTX_new");
+                    result = Err(error::ErrorStack::get());
                 }
-                BIO_free_all(bio_pub_key);
-            }
-            else {
-                trace!("oaep_sha256::encrypt failed to call BIO_new");
+            } else {
+                trace!("oaep_sha256::encrypt PEM_read_bio_PUBKEY failed, err {}", ERR_get_error());
+                result = Err(error::ErrorStack::get());
             }
         }
         result

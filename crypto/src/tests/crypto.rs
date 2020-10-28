@@ -178,8 +178,8 @@ fn test_and_reject_thumbprint_mismatch() {
 fn test_asymmetric_encrypt_and_decrypt(cert: &X509, key: &PrivateKey, security_policy: SecurityPolicy, plaintext_size: usize) {
     let plaintext = (0..plaintext_size).map(|i| (i % 256) as u8).collect::<Vec<u8>>();
 
-    let mut ciphertext = vec![0u8; plaintext_size + 4096];
-    let mut plaintext2 = vec![0u8; plaintext_size + 4096];
+    let mut ciphertext = vec![0u8; plaintext_size + 8192];
+    let mut plaintext2 = vec![0u8; plaintext_size + 8192];
 
     println!("Encrypt with security policy {:?}", security_policy);
     println!("Encrypting data of length {}", plaintext_size);
@@ -192,7 +192,6 @@ fn test_asymmetric_encrypt_and_decrypt(cert: &X509, key: &PrivateKey, security_p
     assert_eq!(plaintext_size, decrypted_size);
     assert_eq!(&plaintext[..], &plaintext2[..decrypted_size]);
 }
-
 
 #[test]
 fn asymmetric_encrypt_and_decrypt() {
