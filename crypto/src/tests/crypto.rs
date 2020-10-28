@@ -226,7 +226,7 @@ fn calculate_cipher_text_size() {
     assert_eq!(pkey.calculate_cipher_text_size(512, padding), 768);
 
     // Testing -42 bounds
-    let padding = RsaPadding::Oaep;
+    let padding = RsaPadding::OaepSha1;
     assert_eq!(pkey.calculate_cipher_text_size(1, padding), 256);
     assert_eq!(pkey.calculate_cipher_text_size(214, padding), 256);
     assert_eq!(pkey.calculate_cipher_text_size(215, padding), 512);
@@ -251,7 +251,7 @@ fn calculate_cipher_text_size2() {
 
     // The cipher text size function should report exactly the same value as the value returned
     // by encrypting bytes. This is especially important on boundary values.
-    for padding in &[RsaPadding::Pkcs1, RsaPadding::Oaep, RsaPadding::OaepSha256] {
+    for padding in &[RsaPadding::Pkcs1, RsaPadding::OaepSha1, RsaPadding::OaepSha256] {
         for src_len in 1..550 {
             let src = vec![127u8; src_len];
 
@@ -519,7 +519,7 @@ fn encrypt_decrypt_password() {
 
     let (cert, pkey) = make_test_cert_1024();
 
-    let padding = RsaPadding::Oaep;
+    let padding = RsaPadding::OaepSha1;
     let secret = legacy_password_encrypt(&password, nonce.as_ref(), &cert, padding).unwrap();
     let password2 = legacy_password_decrypt(&secret, nonce.as_ref(), &pkey, padding).unwrap();
 

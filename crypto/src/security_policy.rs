@@ -500,7 +500,7 @@ impl SecurityPolicy {
     pub fn asymmetric_encryption_padding(&self) -> RsaPadding {
         match self {
             SecurityPolicy::Basic128Rsa15 => RsaPadding::Pkcs1,
-            SecurityPolicy::Basic256 | SecurityPolicy::Basic256Sha256 | SecurityPolicy::Aes128Sha256RsaOaep => RsaPadding::Oaep,
+            SecurityPolicy::Basic256 | SecurityPolicy::Basic256Sha256 | SecurityPolicy::Aes128Sha256RsaOaep => RsaPadding::OaepSha1,
             // PSS uses OAEP-SHA256 for encryption, but PSS for signing
             SecurityPolicy::Aes256Sha256RsaPss => RsaPadding::OaepSha256,
             _ => {

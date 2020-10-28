@@ -16,7 +16,7 @@ use opcua_types::status_code::StatusCode;
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum RsaPadding {
     Pkcs1,
-    Oaep,
+    OaepSha1,
     OaepSha256,
     Pss,
 }
@@ -25,7 +25,7 @@ impl Into<rsa::Padding> for RsaPadding {
     fn into(self) -> rsa::Padding {
         match self {
             RsaPadding::Pkcs1 => rsa::Padding::PKCS1,
-            RsaPadding::Oaep => rsa::Padding::PKCS1_OAEP,
+            RsaPadding::OaepSha1 => rsa::Padding::PKCS1_OAEP,
             RsaPadding::Pss => rsa::Padding::PKCS1_PSS,
             // This is right, but it must be handled by special case in the code
             RsaPadding::OaepSha256 => rsa::Padding::PKCS1_OAEP,
@@ -73,7 +73,7 @@ pub trait KeySize {
         // for RSA_NO_PADDING.
         match padding {
             RsaPadding::Pkcs1 => self.size() - 11,
-            RsaPadding::Oaep => self.size() - 42,
+            RsaPadding::OaepSha1 => self.size() - 42,
             RsaPadding::OaepSha256 => self.size() - 66,
             _ => panic!("Unsupported padding")
         }
@@ -327,13 +327,16 @@ mod oaep_sha256 {
                     if ret > 0 && out_len > 0 {
                         result = Ok(out_len as usize);
                     } else {
+                        trace!("oaep_sha256::decrypt EVP_PKEY_decrypt, ret = {}, out_len = {}", ret, out_len);
                         result = Err(error::ErrorStack::get());
                     }
                     EVP_PKEY_CTX_free(ctx);
                 } else {
+                    trace!("oaep_sha256::decrypt EVP_PKEY_CTX_new");
                     result = Err(error::ErrorStack::get());
                 }
             } else {
+                trace!("oaep_sha256::decrypt EVP_PKEY_new failed, err {}", ERR_get_error());
                 result = Err(error::ErrorStack::get());
             }
         }
@@ -369,7 +372,7 @@ mod oaep_sha256 {
                     result = Err(error::ErrorStack::get());
                 }
             } else {
-                trace!("oaep_sha256::encrypt PEM_read_bio_PUBKEY failed, err {}", ERR_get_error());
+                trace!("oaep_sha256::encrypt EVP_PKEY_new failed, err {}", ERR_get_error());
                 result = Err(error::ErrorStack::get());
             }
         }
