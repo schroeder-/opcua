@@ -9,7 +9,7 @@ use std::{
     result::Result,
 };
 
-use openssl::{hash, pkey::{self, Private, Public}, rsa::{self, Rsa}, sign};
+use openssl::{hash, pkey, rsa, sign};
 
 use opcua_types::status_code::StatusCode;
 
@@ -27,9 +27,8 @@ impl Into<rsa::Padding> for RsaPadding {
             RsaPadding::PKCS1 => rsa::Padding::PKCS1,
             RsaPadding::OAEP => rsa::Padding::PKCS1_OAEP,
             RsaPadding::PSS => rsa::Padding::PKCS1_PSS,
-            // This is wrong, but it must be handled by special case in the code
+            // This is right, but it must be handled by special case in the code
             RsaPadding::OAEP_SHA256 => rsa::Padding::PKCS1_OAEP,
-            _ => panic!("Unsupported conversion to rsa::Padding")
         }
     }
 }
@@ -178,7 +177,7 @@ impl PrivateKey {
                 let dst = &mut dst[dst_idx..(dst_idx + cipher_text_block_size)];
 
                 if is_oaep_sha256 {
-                    decrypt_oaep_sha256(&rsa, src, dst)?
+                    oaep_sha256::decrypt(&rsa, src, dst)?
                 } else {
                     rsa.private_decrypt(src, dst, rsa_padding)
                         .map_err(|err| {
@@ -272,7 +271,7 @@ impl PublicKey {
                 let dst = &mut dst[dst_idx..(dst_idx + cipher_text_block_size)];
 
                 if is_oaep_sha256 {
-                    encrypt_oaep_sha256(&rsa, src, dst)?
+                    oaep_sha256::encrypt(&rsa, src, dst)?
                 } else {
                     rsa.public_encrypt(src, dst, padding)
                         .map_err(|err| {
@@ -289,46 +288,86 @@ impl PublicKey {
     }
 }
 
-/// Special case implementation uses OAEP with SHA256
-fn decrypt_oaep_sha256(pkey: &Rsa<Private>, from: &[u8], to: &mut [u8]) -> Result<usize, ()> {
-    use openssl_sys::*;
+/// This module contains a bunch of nasty stuff to implement OAEP-SHA256 since there are no helpers in OpenSSL to do it
+///
+/// https://stackoverflow.com/questions/17784022/how-to-encrypt-data-using-rsa-with-sha-256-as-hash-function-and-mgf1-as-mask-ge
+mod oaep_sha256 {
     use std::ptr;
 
-    let mut result = Err(());
-    unsafe {
-        // https://stackoverflow.com/questions/17784022/how-to-encrypt-data-using-rsa-with-sha-256-as-hash-function-and-mgf1-as-mask-ge
-        let bioPrivKey = BIO_new(BIO_s_mem());
-        if !bioPrivKey.is_null() {
-            if PEM_write_bio_RSAPrivateKey(bioPrivKey, pkey.as_ptr(), ptr::null(), ptr::null_mut(), 0, None, ptr::null_mut()) {
-                let privKey = PEM_read_bio_PrivateKey(bioPrivKey, ptr::null_mut(), None, ptr::null_mut());
-                if !privKey.is_null() {
-                    let ctx = EVP_PKEY_CTX_new(privKey, ptr::null_mut());
-                    EVP_PKEY_free(privKey);
+    use foreign_types::{ForeignType, ForeignTypeRef};
+    use libc::*;
+    use openssl::{pkey::{Private, Public}, rsa::{self, Rsa}};
+    use openssl_sys::*;
 
-                    if !ctx.is_null() {
+    // This sets up the context for encrypting / decrypting with OAEP + SHA256
+    unsafe fn set_evp_ctrl_oaep_sha256(ctx: *mut EVP_PKEY_CTX) {
+        EVP_PKEY_CTX_set_rsa_padding(ctx, rsa::Padding::PKCS1_OAEP.as_raw());
+        let md = EVP_sha256() as *mut EVP_MD;
+        EVP_PKEY_CTX_set_rsa_mgf1_md(ctx, md);
+        // This is a hack because OpenSSL crate doesn't expose this const or a wrapper fn
+        const EVP_PKEY_CTRL_RSA_OAEP_MD: c_int = EVP_PKEY_ALG_CTRL + 9;
+        EVP_PKEY_CTX_ctrl(ctx, EVP_PKEY_RSA, EVP_PKEY_OP_TYPE_CRYPT, EVP_PKEY_CTRL_RSA_OAEP_MD, 0, md as *mut c_void);
+    }
 
-                        EVP_PKEY_CTX_set_rsa_padding(ctx, pad: c_int) -> c_int {
-                        EVP_PKEY_CTX_ctrl_str(ctx, "rsa_oaep_md", "sha256");
-                        EVP_PKEY_CTX_ctrl_str(ctx, "rsa_mgf1_md", "sha256");
+    /// Special case implementation uses OAEP with SHA256
+    pub fn decrypt(pkey: &Rsa<Private>, from: &[u8], to: &mut [u8]) -> Result<usize, ()> {
+        let mut result = Err(());
+        unsafe {
+            let bio_priv_key = BIO_new(BIO_s_mem());
+            if !bio_priv_key.is_null() {
+                if PEM_write_bio_RSAPrivateKey(bio_priv_key, pkey.as_ptr(), ptr::null(), ptr::null_mut(), 0, None, ptr::null_mut()) > 0 {
+                    let priv_key = PEM_read_bio_PrivateKey(bio_priv_key, ptr::null_mut(), None, ptr::null_mut());
+                    if !priv_key.is_null() {
+                        let ctx = EVP_PKEY_CTX_new(priv_key, ptr::null_mut());
+                        EVP_PKEY_free(priv_key);
 
-                        let mut outLen: size_t = to.size();
-                        let ret = EVP_PKEY_decrypt(ctx, dataOut, &mut outLen, dataIn, from.size());
-                        if ret > 0 && outLen > 0 {
-                            result = Ok(outLen as usize);
+                        if !ctx.is_null() {
+                            let _ret = EVP_PKEY_decrypt_init(ctx);
+                            set_evp_ctrl_oaep_sha256(ctx);
+
+                            let mut out_len: size_t = to.len();
+                            let ret = EVP_PKEY_decrypt(ctx, to.as_mut_ptr(), &mut out_len, from.as_ptr(), from.len());
+                            if ret > 0 && out_len > 0 {
+                                result = Ok(out_len as usize);
+                            }
+                            EVP_PKEY_CTX_free(ctx);
                         }
-                        EVP_PKEY_CTX_free(ctx);
                     }
                 }
+                BIO_free_all(bio_priv_key);
             }
-            BIO_free_all(bioPrivKey);
         }
+        result
     }
-    result
-}
 
-/// Special case implementation uses OAEP with SHA256
-fn encrypt_oaep_sha256(pkey: &Rsa<Public>, from: &[u8], to: &mut [u8]) -> Result<usize, ()> {
-    // TODO special case for OAEP_SHA256
-    // https://stackoverflow.com/questions/17784022/how-to-encrypt-data-using-rsa-with-sha-256-as-hash-function-and-mgf1-as-mask-ge
-    Err(())
+    /// Special case implementation uses OAEP with SHA256
+    pub fn encrypt(pkey: &Rsa<Public>, from: &[u8], to: &mut [u8]) -> Result<usize, ()> {
+        let mut result = Err(());
+        unsafe {
+            let bio_pub_key = BIO_new(BIO_s_mem());
+            if !bio_pub_key.is_null() {
+                if PEM_write_bio_RSAPublicKey(bio_pub_key, pkey.as_ptr()) > 0 {
+                    let pub_key = PEM_read_bio_PUBKEY(bio_pub_key, ptr::null_mut(), None, ptr::null_mut());
+                    if !pub_key.is_null() {
+                        let ctx = EVP_PKEY_CTX_new(pub_key, ptr::null_mut());
+                        EVP_PKEY_free(pub_key);
+
+                        if !ctx.is_null() {
+                            let _ret = EVP_PKEY_encrypt_init(ctx);
+                            set_evp_ctrl_oaep_sha256(ctx);
+
+                            let mut out_len: size_t = to.len();
+                            let ret = EVP_PKEY_encrypt(ctx, to.as_mut_ptr(), &mut out_len, from.as_ptr(), from.len());
+                            if ret > 0 && out_len > 0 {
+                                result = Ok(out_len as usize);
+                            }
+                            EVP_PKEY_CTX_free(ctx);
+                        }
+                    }
+                }
+                BIO_free_all(bio_pub_key);
+            }
+        }
+        result
+    }
 }
