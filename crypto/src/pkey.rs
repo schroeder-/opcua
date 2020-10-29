@@ -12,13 +12,14 @@ use std::{
 use openssl::{hash, pkey, rsa, sign};
 
 use opcua_types::status_code::StatusCode;
+use openssl::sign::RsaPssSaltlen;
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum RsaPadding {
     Pkcs1,
     OaepSha1,
     OaepSha256,
-    Pss,
+    Pkcs1Pss,
 }
 
 impl Into<rsa::Padding> for RsaPadding {
@@ -26,8 +27,8 @@ impl Into<rsa::Padding> for RsaPadding {
         match self {
             RsaPadding::Pkcs1 => rsa::Padding::PKCS1,
             RsaPadding::OaepSha1 => rsa::Padding::PKCS1_OAEP,
-            RsaPadding::Pss => rsa::Padding::PKCS1_PSS,
-            // This is right, but it must be handled by special case in the code
+            RsaPadding::Pkcs1Pss => rsa::Padding::PKCS1_PSS,
+            // Note: This is the right padding but not the right hash and must be handled by special case in the code
             RsaPadding::OaepSha256 => rsa::Padding::PKCS1_OAEP,
         }
     }
@@ -124,7 +125,8 @@ impl PrivateKey {
     fn sign(&self, message_digest: hash::MessageDigest, data: &[u8], signature: &mut [u8], padding: RsaPadding) -> Result<usize, StatusCode> {
         trace!("RSA signing");
         if let Ok(mut signer) = sign::Signer::new(message_digest, &self.value) {
-            signer.set_rsa_padding(padding.into()).unwrap();
+            let _ = signer.set_rsa_padding(padding.into());
+            let _ = signer.set_rsa_pss_saltlen(RsaPssSaltlen::DIGEST_LENGTH);
             if signer.update(data).is_ok() {
                 return signer.sign_to_vec()
                     .map(|result| {
@@ -153,7 +155,7 @@ impl PrivateKey {
 
     /// Signs the data using RSA-SHA256-PSS
     pub fn sign_sha256_pss(&self, data: &[u8], signature: &mut [u8]) -> Result<usize, StatusCode> {
-        self.sign(hash::MessageDigest::sha256(), data, signature, RsaPadding::Pss)
+        self.sign(hash::MessageDigest::sha256(), data, signature, RsaPadding::Pkcs1Pss)
     }
 
     /// Decrypts data in src to dst using the specified padding and returning the size of the decrypted
@@ -206,7 +208,8 @@ impl PublicKey {
     fn verify(&self, message_digest: hash::MessageDigest, data: &[u8], signature: &[u8], padding: RsaPadding) -> Result<bool, StatusCode> {
         trace!("RSA verifying, against signature {:?}, len {}", signature, signature.len());
         if let Ok(mut verifier) = sign::Verifier::new(message_digest, &self.value) {
-            verifier.set_rsa_padding(padding.into()).unwrap();
+            let _ = verifier.set_rsa_padding(padding.into());
+            let _ = verifier.set_rsa_pss_saltlen(RsaPssSaltlen::DIGEST_LENGTH);
             if verifier.update(data).is_ok() {
                 return verifier.verify(signature)
                     .map(|result| {
@@ -234,7 +237,7 @@ impl PublicKey {
 
     /// Verifies the data using RSA-SHA256-PSS
     pub fn verify_sha256_pss(&self, data: &[u8], signature: &[u8]) -> Result<bool, StatusCode> {
-        self.verify(hash::MessageDigest::sha256(), data, signature, RsaPadding::Pss)
+        self.verify(hash::MessageDigest::sha256(), data, signature, RsaPadding::Pkcs1Pss)
     }
 
     /// Encrypts data from src to dst using the specified padding and returns the size of encrypted

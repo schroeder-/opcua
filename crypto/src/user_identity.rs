@@ -93,6 +93,7 @@ pub fn decrypt_user_identity_token_password(user_identity_token: &UserNameIdenti
         let padding = match encryption_algorithm {
             super::algorithms::ENC_RSA_15 => RsaPadding::Pkcs1,
             super::algorithms::ENC_RSA_OAEP => RsaPadding::OaepSha1,
+            super::al
             _ => {
                 error!("decrypt_user_identity_token_password has rejected unsupported user identity encryption algorithm \"{}\"", encryption_algorithm);
                 return Err(StatusCode::BadIdentityTokenInvalid);

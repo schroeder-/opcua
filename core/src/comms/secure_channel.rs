@@ -376,7 +376,7 @@ impl SecureChannel {
 
     // Extra padding required for keysize > 2048 bits (256 bytes)
     fn minimum_padding(signature_size: usize) -> usize {
-        if signature_size > 256 { 2 } else { 1 }
+        if signature_size <= 256 { 1 } else { 2 }
     }
 
     /// Calculate the padding size
