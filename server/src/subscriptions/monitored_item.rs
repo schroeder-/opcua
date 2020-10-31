@@ -194,13 +194,8 @@ impl MonitoredItem {
         if self.monitoring_mode == MonitoringMode::Disabled {
             TickResult::NoChange
         } else {
-            let have_last_data_value = self.last_data_value.is_some();
-            let first_tick = !self.is_event_filter() && !have_last_data_value;
-
             let check_value = if resend_data {
                 // Always check for resend_data flag
-                true
-            } else if first_tick {
                 true
             } else if self.sampling_interval < 0f64 {
                 // -1 means use the subscription publishing interval so if the publishing interval elapsed,
@@ -220,6 +215,7 @@ impl MonitoredItem {
             // Test the value (or don't)
             let value_changed = check_value && {
                 // Indicate a change if reporting is enabled
+                let first_tick = !self.is_event_filter() && self.last_data_value.is_none();
                 let value_changed = self.check_value(address_space, now, resend_data);
                 first_tick || value_changed || !self.notification_queue.is_empty()
             };
