@@ -1,30 +1,28 @@
-//! A WaitGroup waits for a collection of task to finish.
-//!
-//! ## Examples
-//! ```rust
-//! use waitgroup::WaitGroup;
-//! use async_std::task;
-//! async {
-//!     let wg = WaitGroup::new();
-//!     for _ in 0..100 {
-//!         let w = wg.worker();
-//!         task::spawn(async move {
-//!             // do work
-//!             drop(w); // drop d means task finished
-//!         };
-//!     }
-//!
-//!     wg.wait().await;
-//! }
-//! ```
-//!
+/// A WaitGroup waits for a collection of task to finish.
+///
+/// ## Examples
+/// ```rust
+/// use opcua_core::wait_group::WaitGroup;
+/// #[tokio::main]
+/// async fn main() {
+///     let wg = WaitGroup::new();
+///     for _ in 0..100 {
+///         let w = wg.worker();
+///         tokio::spawn(async move {
+///             // do work
+///             drop(w); // drop d means task finished
+///         });
+///     }
+///
+///     wg.wait().await;
+/// }
+/// ```
+///
 use std::future::Future;
 use std::pin::Pin;
 use std::sync::{Arc, Weak};
 use std::task::{Context, Poll};
 
-// AtomicWaker is exposed in futures_utils, here use the internal one from futures_core to avoid
-// introducing a lot of dependencies.
 use futures::task::AtomicWaker;
 
 pub struct WaitGroup {
