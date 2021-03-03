@@ -12,8 +12,8 @@ fn main() {
 }
 
 struct App {
-    pub builder: Rc<gtk::Builder>,
-    pub model: AppModel,
+    builder: Rc<gtk::Builder>,
+    model: AppModel,
     toolbar_connect_btn: Rc<gtk::ToolButton>,
     toolbar_disconnect_btn: Rc<gtk::ToolButton>,
 }

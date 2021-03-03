@@ -5,6 +5,8 @@ use gtk::{self, prelude::*};
 
 struct NewConnectionDlgImpl {
     dlg: Rc<gtk::Dialog>,
+    security_policy_combo: Rc<gtk::ComboBox>,
+    message_security_mode_combo: Rc<gtk::ComboBox>,
 }
 
 pub(crate) struct NewConnectionDlg {
@@ -18,7 +20,14 @@ impl NewConnectionDlg {
             Rc::new(builder.get_object("new_connection_connect_btn").unwrap());
         let cancel_btn: Rc<gtk::Button> =
             Rc::new(builder.get_object("new_connection_cancel_btn").unwrap());
-        let data = Rc::new(NewConnectionDlgImpl { dlg });
+
+        let data = Rc::new(NewConnectionDlgImpl {
+            dlg,
+            security_policy_combo: Rc::new(builder.get_object("security_policy_combo").unwrap()),
+            message_security_mode_combo: Rc::new(
+                builder.get_object("security_policy_combo").unwrap(),
+            ),
+        });
 
         // Connect button
         connect_btn.connect_clicked(clone!(@weak data => move |_| {

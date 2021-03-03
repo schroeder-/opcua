@@ -197,21 +197,12 @@
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="max_width_chars">128</property>
+                <property name="placeholder_text" translatable="yes">opc.tcp://localhost:4852</property>
                 <property name="input_purpose">url</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkComboBox" id="security_policy">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">1</property>
               </packing>
             </child>
             <child>
@@ -248,9 +239,29 @@
               </packing>
             </child>
             <child>
-              <object class="GtkComboBox" id="message_security_mode">
+              <object class="GtkComboBoxText" id="security_policy_combo">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="active">0</property>
+                <items>
+                  <item translatable="yes">None</item>
+                </items>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBoxText" id="message_security_mode_combo">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="active">0</property>
+                <items>
+                  <item id="0" translatable="yes">None</item>
+                  <item id="1" translatable="yes">Sign</item>
+                  <item id="2" translatable="yes">SignAndEncrypt</item>
+                </items>
               </object>
               <packing>
                 <property name="left_attach">1</property>
