@@ -2,7 +2,18 @@
 <!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
-  <object class="GtkEntryBuffer"/>
+  <object class="GtkTreeStore" id="address_space_model">
+    <columns>
+      <!-- column-name Node Id -->
+      <column type="gchararray"/>
+      <!-- column-name Browse Name -->
+      <column type="gchararray"/>
+      <!-- column-name Display Name -->
+      <column type="gchararray"/>
+      <!-- column-name Reference Type Id -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkApplicationWindow" id="main_window">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">OPC UA Explorer</property>
@@ -62,6 +73,7 @@
               <object class="GtkTreeView" id="address_space_tree">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="model">address_space_model</property>
                 <child internal-child="selection">
                   <object class="GtkTreeSelection"/>
                 </child>
@@ -114,10 +126,39 @@
             <property name="can_focus">True</property>
             <property name="expanded">True</property>
             <child>
-              <object class="GtkTextView" id="log">
+              <object class="GtkGrid">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="editable">False</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkTextView" id="log">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="editable">False</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
+                    <property name="width">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="clear_log">
+                    <property name="label" translatable="yes">Clear Log</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="top_attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
               </object>
             </child>
             <child type="label">

@@ -3,9 +3,13 @@ use std::rc::Rc;
 use glib::clone;
 use gtk::{self, prelude::*};
 
-use new_connection_dlg::NewConnectionDlg;
+use opcua_client::prelude::*;
 
+mod app_model;
 mod new_connection_dlg;
+
+use app_model::AppModel;
+use new_connection_dlg::NewConnectionDlg;
 
 fn main() {
     App::run();
@@ -13,12 +17,10 @@ fn main() {
 
 struct App {
     builder: Rc<gtk::Builder>,
-    model: AppModel,
+    model: Rc<app_model::AppModel>,
     toolbar_connect_btn: Rc<gtk::ToolButton>,
     toolbar_disconnect_btn: Rc<gtk::ToolButton>,
 }
-
-struct AppModel {}
 
 impl App {
     pub fn run() {
@@ -41,18 +43,18 @@ impl App {
             builder,
             toolbar_connect_btn,
             toolbar_disconnect_btn,
-            model: AppModel {},
+            model: Rc::new(AppModel::new()),
         });
 
         // Hook up the toolbar buttons
         app.toolbar_connect_btn
             .connect_clicked(clone!(@weak app => move |_| {
-                app.on_connect();
+                app.on_connect_btn_clicked();
             }));
 
         app.toolbar_disconnect_btn
             .connect_clicked(clone!(@weak app => move |_| {
-                app.on_disconnect();
+                app.on_disconnect_btn_clicked();
             }));
 
         // Address space explorer pane
@@ -81,13 +83,25 @@ impl App {
         gtk::main();
     }
 
-    pub fn on_connect(&self) {
+    pub fn on_connect_btn_clicked(&self) {
         println!("Clicked!");
-        let dlg = NewConnectionDlg::new(&self.builder);
+        let dlg = NewConnectionDlg::new(self.model.clone(), &self.builder);
         dlg.show();
+
+        // TODO
+        self.populate_address_space();
     }
 
-    pub fn on_disconnect(&self) {
+    pub fn on_connect(&self) {}
+
+    pub fn populate_address_space(&self) {
+        let address_space_model: gtk::TreeStore =
+            self.builder.get_object("address_space_model").unwrap();
+        let values = ("s=1", "Browse Name", "Display Name", "i=333");
+        address_space_model.insert_with_values(None, None, &[0, 1, 2, 3], values);
+    }
+
+    pub fn on_disconnect_btn_clicked(&self) {
         println!("Disconnect Clicked!");
     }
 
