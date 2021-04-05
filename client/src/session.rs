@@ -18,7 +18,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-use futures::{future, stream::Stream, sync::mpsc::UnboundedSender, Future};
+use futures::{future, stream::Stream, Future};
 use tokio;
 use tokio_timer::Interval;
 
@@ -49,7 +49,6 @@ use crate::{
     session_state::{ConnectionState, SessionState},
     subscription::{self, Subscription},
     subscription_state::SubscriptionState,
-    subscription_timer::{SubscriptionTimer, SubscriptionTimerCommand},
 };
 
 macro_rules! session_warn {
@@ -121,14 +120,14 @@ pub enum SessionCommand {
 pub struct Session {
     /// The client application's name.
     application_description: ApplicationDescription,
+    /// A name for the session, supplied during create
+    session_name: UAString,
     /// The session connection info.
     session_info: SessionInfo,
     /// Runtime state of the session, reset if disconnected.
     session_state: Arc<RwLock<SessionState>>,
     /// Subscriptions state.
     subscription_state: Arc<RwLock<SubscriptionState>>,
-    /// Subscription timer command.
-    timer_command_queue: UnboundedSender<SubscriptionTimerCommand>,
     /// Transport layer.
     transport: TcpTransport,
     /// Certificate store.
@@ -164,15 +163,21 @@ impl Session {
     ///
     /// * `Session` - the interface that shall be used to communicate between the client and the server.
     ///
-    pub(crate) fn new(
+    pub(crate) fn new<T>(
         application_description: ApplicationDescription,
+        session_name: T,
         certificate_store: Arc<RwLock<CertificateStore>>,
         session_info: SessionInfo,
         session_retry_policy: SessionRetryPolicy,
         single_threaded_executor: bool,
-    ) -> Session {
+    ) -> Session
+    where
+        T: Into<UAString>,
+    {
         // TODO take these from the client config
         let decoding_limits = DecodingLimits::default();
+
+        let session_name = session_name.into();
 
         let secure_channel = Arc::new(RwLock::new(SecureChannel::new(
             certificate_store.clone(),
@@ -191,18 +196,13 @@ impl Session {
             single_threaded_executor,
         );
         let subscription_state = Arc::new(RwLock::new(SubscriptionState::new()));
-        let timer_command_queue = SubscriptionTimer::make_timer_command_queue(
-            session_state.clone(),
-            subscription_state.clone(),
-            single_threaded_executor,
-        );
         Session {
             application_description,
+            session_name,
             session_info,
             session_state,
             certificate_store,
             subscription_state,
-            timer_command_queue,
             transport,
             secure_channel,
             message_queue,
@@ -218,12 +218,6 @@ impl Session {
             secure_channel.clear_security_token();
         }
 
-        // Cancel any subscription timers
-        {
-            let mut subscription_state = trace_write_lock_unwrap!(self.subscription_state);
-            subscription_state.cancel_subscription_timers();
-        }
-
         // Create a new session state
         self.session_state = Arc::new(RwLock::new(SessionState::new(
             self.secure_channel.clone(),
@@ -235,13 +229,6 @@ impl Session {
             self.secure_channel.clone(),
             self.session_state.clone(),
             self.message_queue.clone(),
-            self.single_threaded_executor,
-        );
-
-        // Create a new timer command queue
-        self.timer_command_queue = SubscriptionTimer::make_timer_command_queue(
-            self.session_state.clone(),
-            self.subscription_state.clone(),
             self.single_threaded_executor,
         );
     }
@@ -422,7 +409,7 @@ impl Session {
                                         client_handle: item.client_handle(),
                                         sampling_interval: item.sampling_interval(),
                                         filter: ExtensionObject::null(),
-                                        queue_size: item.queue_size(),
+                                        queue_size: item.queue_size() as u32,
                                         discard_oldest: true,
                                     },
                                 })
@@ -462,18 +449,6 @@ impl Session {
                         );
                     }
                 });
-
-            // Now all the subscriptions should have been recreated, it should be possible
-            // to kick off the publish timers.
-            let subscription_ids = {
-                let subscription_state = trace_read_lock_unwrap!(subscription_state);
-                subscription_state.subscription_ids().unwrap()
-            };
-            for subscription_id in &subscription_ids {
-                let _ = self
-                    .timer_command_queue
-                    .unbounded_send(SubscriptionTimerCommand::CreateTimer(*subscription_id));
-            }
         }
         Ok(())
     }
@@ -940,7 +915,7 @@ impl Session {
         };
 
         let server_uri = UAString::null();
-        let session_name = UAString::from("Rust OPCUA Client");
+        let session_name = self.session_name.clone();
 
         let (client_certificate, _) = {
             let certificate_store = trace_write_lock_unwrap!(self.certificate_store);
@@ -2491,17 +2466,12 @@ impl Session {
                 callback,
             );
 
+            // Send an async publish request for this new subscription
             {
-                let subscription_id = {
-                    let mut subscription_state = trace_write_lock_unwrap!(self.subscription_state);
-                    let subscription_id = subscription.subscription_id();
-                    subscription_state.add_subscription(subscription);
-                    subscription_id
-                };
-                let _ = self
-                    .timer_command_queue
-                    .unbounded_send(SubscriptionTimerCommand::CreateTimer(subscription_id));
+                let mut session_state = trace_write_lock_unwrap!(self.session_state);
+                let _ = session_state.async_publish();
             }
+
             session_debug!(
                 self,
                 "create_subscription, created a subscription with id {}",
@@ -3022,7 +2992,6 @@ impl Session {
     /// notifications to the client for processing.
     fn handle_async_response(&mut self, response: SupportedMessage) {
         session_debug!(self, "handle_async_response");
-        let mut wait_for_publish_response = false;
         match response {
             SupportedMessage::PublishResponse(response) => {
                 session_debug!(self, "PublishResponse");
@@ -3032,13 +3001,17 @@ impl Session {
                 let notification_message = response.notification_message.clone();
                 let subscription_id = response.subscription_id;
 
-                // Queue an acknowledgement for this request
-                {
-                    let mut session_state = trace_write_lock_unwrap!(self.session_state);
-                    session_state.add_subscription_acknowledgement(SubscriptionAcknowledgement {
-                        subscription_id,
-                        sequence_number: notification_message.sequence_number,
-                    });
+                // Queue an acknowledgement for this request (if it has data)
+                if let Some(ref notification_data) = notification_message.notification_data {
+                    if !notification_data.is_empty() {
+                        let mut session_state = trace_write_lock_unwrap!(self.session_state);
+                        session_state.add_subscription_acknowledgement(
+                            SubscriptionAcknowledgement {
+                                subscription_id,
+                                sequence_number: notification_message.sequence_number,
+                            },
+                        );
+                    }
                 }
 
                 let decoding_limits = {
@@ -3068,6 +3041,12 @@ impl Session {
                         subscription_state.on_event(subscription_id, &events);
                     }
                 }
+
+                // Send another publish request
+                {
+                    let mut session_state = trace_write_lock_unwrap!(self.session_state);
+                    let _ = session_state.async_publish();
+                }
             }
             SupportedMessage::ServiceFault(response) => {
                 let service_result = response.response_header.service_result;
@@ -3079,9 +3058,14 @@ impl Session {
                 session_trace!(self, "ServiceFault {:?}", response);
 
                 match service_result {
+                    StatusCode::BadTimeout => {
+                        debug!("Publish request timed out so sending another");
+                        let mut session_state = trace_write_lock_unwrap!(self.session_state);
+                        let _ = session_state.async_publish();
+                    }
                     StatusCode::BadTooManyPublishRequests => {
                         // Turn off publish requests until server says otherwise
-                        wait_for_publish_response = true
+                        debug!("Server tells us too many publish requests so waiting for a response before resuming");
                     }
                     StatusCode::BadSessionClosed | StatusCode::BadSessionIdInvalid => {
                         let mut session_state = trace_write_lock_unwrap!(self.session_state);
@@ -3093,12 +3077,6 @@ impl Session {
             _ => {
                 info!("{} unhandled response", self.session_id());
             }
-        }
-
-        // Turn on/off publish requests
-        {
-            let mut session_state = trace_write_lock_unwrap!(self.session_state);
-            session_state.set_wait_for_publish_response(wait_for_publish_response);
         }
     }
 

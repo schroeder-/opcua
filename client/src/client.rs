@@ -387,10 +387,11 @@ impl Client {
         } else {
             let session = Arc::new(RwLock::new(Session::new(
                 self.application_description(),
+                self.config.session_name.clone(),
                 self.certificate_store.clone(),
                 session_info,
                 self.session_retry_policy.clone(),
-                self.config.single_threaded_executor,
+                self.config.performance.single_threaded_executor,
             )));
             Ok(session)
         }
@@ -461,10 +462,11 @@ impl Client {
             };
             let mut session = Session::new(
                 self.application_description(),
+                self.config.session_name.clone(),
                 self.certificate_store.clone(),
                 session_info,
                 self.session_retry_policy.clone(),
-                self.config.single_threaded_executor,
+                self.config.performance.single_threaded_executor,
             );
             session.connect()?;
             let result = session.get_endpoints()?;
