@@ -4,13 +4,13 @@
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkTreeStore" id="address_space_model">
     <columns>
-      <!-- column-name Node Id -->
+      <!-- column-name node_id -->
       <column type="gchararray"/>
-      <!-- column-name Browse Name -->
+      <!-- column-name browse_name -->
       <column type="gchararray"/>
-      <!-- column-name Display Name -->
+      <!-- column-name display_name -->
       <column type="gchararray"/>
-      <!-- column-name Reference Type Id -->
+      <!-- column-name reference_type_id -->
       <column type="gchararray"/>
     </columns>
   </object>
@@ -76,6 +76,22 @@
                 <property name="model">address_space_model</property>
                 <child internal-child="selection">
                   <object class="GtkTreeSelection"/>
+                </child>
+                <child>
+                  <object class="GtkTreeViewColumn" id="browse_name">
+                    <property name="title" translatable="yes">Browse Name</property>
+                    <property name="clickable">True</property>
+                    <child>
+                      <object class="GtkCellRendererPixbuf"/>
+                    </child>
+                    <child>
+                      <object class="GtkCellRendererText"/>
+                      <attributes>
+                        <attribute name="foreground">1</attribute>
+                        <attribute name="text">1</attribute>
+                      </attributes>
+                    </child>
+                  </object>
                 </child>
               </object>
             </child>

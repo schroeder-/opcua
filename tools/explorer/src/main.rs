@@ -97,8 +97,13 @@ impl App {
     pub fn populate_address_space(&self) {
         let address_space_model: gtk::TreeStore =
             self.builder.get_object("address_space_model").unwrap();
-        let values = ("s=1", "Browse Name", "Display Name", "i=333");
-        address_space_model.insert_with_values(None, None, &[0, 1, 2, 3], values);
+
+        let v1 = "s=1".to_value();
+        let v2 = "Browse Name".to_value();
+        let v3 = "Display Name".to_value();
+        let v4 = "i=333".to_value();
+        let values: Vec<&dyn ToValue> = vec![&v1, &v2, &v3, &v4];
+        address_space_model.insert_with_values(None, None, &[0, 1, 2, 3], &values);
     }
 
     pub fn on_disconnect_btn_clicked(&self) {

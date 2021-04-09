@@ -8,6 +8,7 @@ impl AppModel {
     }
 
     pub fn connect(
+        &self,
         host: &str,
         security_policy: SecurityPolicy,
         message_security_mode: MessageSecurityMode,

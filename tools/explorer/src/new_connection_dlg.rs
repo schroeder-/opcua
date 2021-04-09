@@ -59,7 +59,7 @@ impl NewConnectionDlgImpl {
     }
 
     pub fn on_connect_btn_clicked(&self) {
-        self.app_model.connect(
+        self.model.connect(
             "opc.tcp://fixme",
             SecurityPolicy::None,
             MessageSecurityMode::None,
