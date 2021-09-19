@@ -12,9 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
     node_id::NodeId,
+    service_types::impls::MessageInfo,
     service_types::enums::PermissionType,
 };
 
@@ -54,5 +54,9 @@ impl BinaryEncoder<RolePermissionType> for RolePermissionType {
             role_id,
             permissions,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::RolePermissionType_Encoding_DefaultBinary.into()
     }
 }

@@ -12,9 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
     node_id::NodeId,
+    service_types::impls::MessageInfo,
     node_id::ExpandedNodeId,
     qualified_name::QualifiedName,
     localized_text::LocalizedText,
@@ -82,5 +82,9 @@ impl BinaryEncoder<ReferenceDescription> for ReferenceDescription {
             node_class,
             type_definition,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ReferenceDescription_Encoding_DefaultBinary.into()
     }
 }

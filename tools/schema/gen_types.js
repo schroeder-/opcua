@@ -42,7 +42,7 @@ let basic_types_import_map = {
         "DataSetFieldContentMask", "DataSetFieldFlags", "UadpDataSetMessageContentMask", "UadpNetworkMessageContentMask",
         "OverrideValueHandling", "DataSetOrderingType", "PermissionType", "StructureType", "IdentityCriteriaType",
     ],
-    "node_id": ["NodeId", "ExpandedNodeId"],
+    "node_id": ["ExpandedNodeId"],
     "data_value": ["DataValue"],
     "date_time": ["DateTime"],
     "status_codes": ["StatusCode"]
@@ -374,11 +374,12 @@ function generate_type_imports(structured_types, fields_to_add, fields_to_hide, 
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
 `;
 
     if (has_message_info) {
         imports += `    service_types::impls::MessageInfo,
-    node_ids::ObjectId,
 `;
     }
 
@@ -556,6 +557,10 @@ pub struct ${structured_type.name} {
     });
 
     contents += `        })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::${structured_type.name}_Encoding_DefaultBinary.into()
     }
 }
 `;

@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     string::UAString,
     byte_string::ByteString,
 };
@@ -56,5 +58,9 @@ impl BinaryEncoder<UserNameIdentityToken> for UserNameIdentityToken {
             password,
             encryption_algorithm,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::UserNameIdentityToken_Encoding_DefaultBinary.into()
     }
 }

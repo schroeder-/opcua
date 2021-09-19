@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     request_header::RequestHeader,
     string::UAString,
     extension_object::ExtensionObject,
@@ -77,5 +78,9 @@ impl BinaryEncoder<ActivateSessionRequest> for ActivateSessionRequest {
             user_identity_token,
             user_token_signature,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ActivateSessionRequest_Encoding_DefaultBinary.into()
     }
 }

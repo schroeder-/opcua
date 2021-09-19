@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     extension_object::ExtensionObject,
 };
 
@@ -68,5 +69,9 @@ impl BinaryEncoder<MonitoringParameters> for MonitoringParameters {
             queue_size,
             discard_oldest,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::MonitoringParameters_Encoding_DefaultBinary.into()
     }
 }

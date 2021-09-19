@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     diagnostic_info::DiagnosticInfo,
     service_types::ContentFilterElementResult,
 };
@@ -54,5 +55,9 @@ impl BinaryEncoder<ContentFilterResult> for ContentFilterResult {
             element_results,
             element_diagnostic_infos,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ContentFilterResult_Encoding_DefaultBinary.into()
     }
 }

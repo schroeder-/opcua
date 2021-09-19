@@ -12,12 +12,12 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     localized_text::LocalizedText,
     service_types::enums::DataSetFieldFlags,
-    node_id::NodeId,
     guid::Guid,
     service_types::KeyValuePair,
 };
@@ -98,5 +98,9 @@ impl BinaryEncoder<FieldMetaData> for FieldMetaData {
             data_set_field_id,
             properties,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::FieldMetaData_Encoding_DefaultBinary.into()
     }
 }

@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     response_header::ResponseHeader,
     service_types::NotificationMessage,
 };
@@ -54,5 +55,9 @@ impl BinaryEncoder<RepublishResponse> for RepublishResponse {
             response_header,
             notification_message,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::RepublishResponse_Encoding_DefaultBinary.into()
     }
 }

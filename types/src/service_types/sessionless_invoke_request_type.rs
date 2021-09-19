@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
 };
 
@@ -68,5 +69,9 @@ impl BinaryEncoder<SessionlessInvokeRequestType> for SessionlessInvokeRequestTyp
             locale_ids,
             service_id,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::SessionlessInvokeRequestType_Encoding_DefaultBinary.into()
     }
 }

@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     extension_object::ExtensionObject,
 };
 
@@ -40,5 +42,9 @@ impl BinaryEncoder<DatagramConnectionTransportDataType> for DatagramConnectionTr
         Ok(DatagramConnectionTransportDataType {
             discovery_address,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::DatagramConnectionTransportDataType_Encoding_DefaultBinary.into()
     }
 }

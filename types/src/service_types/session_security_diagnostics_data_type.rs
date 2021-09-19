@@ -12,9 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
     node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     service_types::enums::MessageSecurityMode,
     byte_string::ByteString,
@@ -91,5 +91,9 @@ impl BinaryEncoder<SessionSecurityDiagnosticsDataType> for SessionSecurityDiagno
             security_policy_uri,
             client_certificate,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::SessionSecurityDiagnosticsDataType_Encoding_DefaultBinary.into()
     }
 }

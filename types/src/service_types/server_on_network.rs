@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
 };
 
@@ -63,5 +64,9 @@ impl BinaryEncoder<ServerOnNetwork> for ServerOnNetwork {
             discovery_url,
             server_capabilities,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ServerOnNetwork_Encoding_DefaultBinary.into()
     }
 }

@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     date_time::DateTime,
     service_types::EventFilter,
 };
@@ -56,5 +58,9 @@ impl BinaryEncoder<ReadEventDetails> for ReadEventDetails {
             end_time,
             filter,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ReadEventDetails_Encoding_DefaultBinary.into()
     }
 }

@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     string::UAString,
     service_types::enums::BrokerTransportQualityOfService,
 };
@@ -66,5 +68,9 @@ impl BinaryEncoder<BrokerDataSetWriterTransportDataType> for BrokerDataSetWriter
             meta_data_queue_name,
             meta_data_update_time,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::BrokerDataSetWriterTransportDataType_Encoding_DefaultBinary.into()
     }
 }

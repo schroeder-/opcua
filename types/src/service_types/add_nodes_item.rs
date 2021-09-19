@@ -12,10 +12,10 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
-    node_id::ExpandedNodeId,
     node_id::NodeId,
+    service_types::impls::MessageInfo,
+    node_id::ExpandedNodeId,
     qualified_name::QualifiedName,
     service_types::enums::NodeClass,
     extension_object::ExtensionObject,
@@ -82,5 +82,9 @@ impl BinaryEncoder<AddNodesItem> for AddNodesItem {
             node_attributes,
             type_definition,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::AddNodesItem_Encoding_DefaultBinary.into()
     }
 }

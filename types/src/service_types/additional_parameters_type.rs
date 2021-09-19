@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     service_types::KeyValuePair,
 };
 
@@ -48,5 +49,9 @@ impl BinaryEncoder<AdditionalParametersType> for AdditionalParametersType {
         Ok(AdditionalParametersType {
             parameters,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::AdditionalParametersType_Encoding_DefaultBinary.into()
     }
 }

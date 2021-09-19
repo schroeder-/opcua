@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     request_header::RequestHeader,
     service_types::enums::SecurityTokenRequestType,
     service_types::enums::MessageSecurityMode,
@@ -76,5 +77,9 @@ impl BinaryEncoder<OpenSecureChannelRequest> for OpenSecureChannelRequest {
             client_nonce,
             requested_lifetime,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::OpenSecureChannelRequest_Encoding_DefaultBinary.into()
     }
 }

@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     response_header::ResponseHeader,
     service_types::EndpointDescription,
 };
@@ -54,5 +55,9 @@ impl BinaryEncoder<GetEndpointsResponse> for GetEndpointsResponse {
             response_header,
             endpoints,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::GetEndpointsResponse_Encoding_DefaultBinary.into()
     }
 }

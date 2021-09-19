@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     localized_text::LocalizedText,
     service_types::GenericAttributeValue,
 };
@@ -66,5 +68,9 @@ impl BinaryEncoder<GenericAttributes> for GenericAttributes {
             user_write_mask,
             attribute_values,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::GenericAttributes_Encoding_DefaultBinary.into()
     }
 }

@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     string::UAString,
 };
 
@@ -45,5 +47,9 @@ impl BinaryEncoder<BrokerConnectionTransportDataType> for BrokerConnectionTransp
             resource_uri,
             authentication_profile_uri,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::BrokerConnectionTransportDataType_Encoding_DefaultBinary.into()
     }
 }

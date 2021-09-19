@@ -12,11 +12,11 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     localized_text::LocalizedText,
-    node_id::NodeId,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -80,5 +80,9 @@ impl BinaryEncoder<StructureField> for StructureField {
             max_string_length,
             is_optional,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::StructureField_Encoding_DefaultBinary.into()
     }
 }

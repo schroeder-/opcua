@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    date_time::DateTime,
+    node_ids::ObjectId,
     node_id::NodeId,
+    date_time::DateTime,
     service_types::AggregateConfiguration,
 };
 
@@ -57,5 +58,9 @@ impl BinaryEncoder<AggregateFilter> for AggregateFilter {
             processing_interval,
             aggregate_configuration,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::AggregateFilter_Encoding_DefaultBinary.into()
     }
 }

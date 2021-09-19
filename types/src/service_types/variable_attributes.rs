@@ -12,9 +12,10 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     localized_text::LocalizedText,
     variant::Variant,
-    node_id::NodeId,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -102,5 +103,9 @@ impl BinaryEncoder<VariableAttributes> for VariableAttributes {
             minimum_sampling_interval,
             historizing,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::VariableAttributes_Encoding_DefaultBinary.into()
     }
 }

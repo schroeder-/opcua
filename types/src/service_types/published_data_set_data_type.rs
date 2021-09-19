@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     extension_object::ExtensionObject,
     service_types::DataSetMetaDataType,
@@ -71,5 +72,9 @@ impl BinaryEncoder<PublishedDataSetDataType> for PublishedDataSetDataType {
             extension_fields,
             data_set_source,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::PublishedDataSetDataType_Encoding_DefaultBinary.into()
     }
 }

@@ -12,9 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
     node_id::NodeId,
+    service_types::impls::MessageInfo,
     node_id::ExpandedNodeId,
 };
 
@@ -69,5 +69,9 @@ impl BinaryEncoder<DeleteReferencesItem> for DeleteReferencesItem {
             target_node_id,
             delete_bidirectional,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::DeleteReferencesItem_Encoding_DefaultBinary.into()
     }
 }

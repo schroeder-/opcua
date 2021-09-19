@@ -12,6 +12,7 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
     node_id::NodeId,
     service_types::enums::PerformUpdateType,
     data_value::DataValue,
@@ -52,5 +53,9 @@ impl BinaryEncoder<UpdateDataDetails> for UpdateDataDetails {
             perform_insert_replace,
             update_values,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::UpdateDataDetails_Encoding_DefaultBinary.into()
     }
 }

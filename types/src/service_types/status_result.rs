@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     status_codes::StatusCode,
     diagnostic_info::DiagnosticInfo,
 };
@@ -54,5 +55,9 @@ impl BinaryEncoder<StatusResult> for StatusResult {
             status_code,
             diagnostic_info,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::StatusResult_Encoding_DefaultBinary.into()
     }
 }

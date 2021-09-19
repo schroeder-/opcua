@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     request_header::RequestHeader,
 };
 
@@ -68,5 +69,9 @@ impl BinaryEncoder<SetTriggeringRequest> for SetTriggeringRequest {
             links_to_add,
             links_to_remove,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::SetTriggeringRequest_Encoding_DefaultBinary.into()
     }
 }

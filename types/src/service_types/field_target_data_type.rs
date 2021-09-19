@@ -12,11 +12,11 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     guid::Guid,
     string::UAString,
-    node_id::NodeId,
     service_types::enums::OverrideValueHandling,
     variant::Variant,
 };
@@ -82,5 +82,9 @@ impl BinaryEncoder<FieldTargetDataType> for FieldTargetDataType {
             override_value_handling,
             override_value,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::FieldTargetDataType_Encoding_DefaultBinary.into()
     }
 }

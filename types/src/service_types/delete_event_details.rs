@@ -12,6 +12,7 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
     node_id::NodeId,
     byte_string::ByteString,
 };
@@ -46,5 +47,9 @@ impl BinaryEncoder<DeleteEventDetails> for DeleteEventDetails {
             node_id,
             event_ids,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::DeleteEventDetails_Encoding_DefaultBinary.into()
     }
 }

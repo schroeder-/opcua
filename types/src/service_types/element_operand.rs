@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -39,5 +41,9 @@ impl BinaryEncoder<ElementOperand> for ElementOperand {
         Ok(ElementOperand {
             index,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ElementOperand_Encoding_DefaultBinary.into()
     }
 }

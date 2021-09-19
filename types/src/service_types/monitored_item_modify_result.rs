@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     status_codes::StatusCode,
     extension_object::ExtensionObject,
 };
@@ -64,5 +65,9 @@ impl BinaryEncoder<MonitoredItemModifyResult> for MonitoredItemModifyResult {
             revised_queue_size,
             filter_result,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::MonitoredItemModifyResult_Encoding_DefaultBinary.into()
     }
 }

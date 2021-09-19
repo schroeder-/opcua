@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     date_time::DateTime,
     extension_object::ExtensionObject,
 };
@@ -59,5 +60,9 @@ impl BinaryEncoder<NotificationMessage> for NotificationMessage {
             publish_time,
             notification_data,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::NotificationMessage_Encoding_DefaultBinary.into()
     }
 }

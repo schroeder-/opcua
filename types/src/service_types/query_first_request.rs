@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     request_header::RequestHeader,
     service_types::ViewDescription,
     service_types::NodeTypeDescription,
@@ -76,5 +77,9 @@ impl BinaryEncoder<QueryFirstRequest> for QueryFirstRequest {
             max_data_sets_to_return,
             max_references_to_return,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::QueryFirstRequest_Encoding_DefaultBinary.into()
     }
 }

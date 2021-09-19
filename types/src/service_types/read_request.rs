@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     request_header::RequestHeader,
     service_types::enums::TimestampsToReturn,
     service_types::ReadValueId,
@@ -65,5 +66,9 @@ impl BinaryEncoder<ReadRequest> for ReadRequest {
             timestamps_to_return,
             nodes_to_read,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ReadRequest_Encoding_DefaultBinary.into()
     }
 }

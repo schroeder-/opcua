@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     date_time::DateTime,
 };
 
@@ -63,5 +64,9 @@ impl BinaryEncoder<ChannelSecurityToken> for ChannelSecurityToken {
             created_at,
             revised_lifetime,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ChannelSecurityToken_Encoding_DefaultBinary.into()
     }
 }

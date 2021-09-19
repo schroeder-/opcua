@@ -12,6 +12,7 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
     node_id::NodeId,
     qualified_name::QualifiedName,
     service_types::EnumDefinition,
@@ -57,5 +58,9 @@ impl BinaryEncoder<EnumDescription> for EnumDescription {
             enum_definition,
             built_in_type,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::EnumDescription_Encoding_DefaultBinary.into()
     }
 }

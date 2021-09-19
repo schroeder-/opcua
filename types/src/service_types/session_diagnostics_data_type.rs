@@ -12,9 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
     node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     date_time::DateTime,
     service_types::ApplicationDescription,
@@ -262,5 +262,9 @@ impl BinaryEncoder<SessionDiagnosticsDataType> for SessionDiagnosticsDataType {
             register_nodes_count,
             unregister_nodes_count,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::SessionDiagnosticsDataType_Encoding_DefaultBinary.into()
     }
 }

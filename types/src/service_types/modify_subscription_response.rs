@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     response_header::ResponseHeader,
 };
 
@@ -63,5 +64,9 @@ impl BinaryEncoder<ModifySubscriptionResponse> for ModifySubscriptionResponse {
             revised_lifetime_count,
             revised_max_keep_alive_count,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ModifySubscriptionResponse_Encoding_DefaultBinary.into()
     }
 }

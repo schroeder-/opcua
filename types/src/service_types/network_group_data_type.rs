@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     service_types::EndpointUrlListDataType,
 };
@@ -54,5 +55,9 @@ impl BinaryEncoder<NetworkGroupDataType> for NetworkGroupDataType {
             server_uri,
             network_paths,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::NetworkGroupDataType_Encoding_DefaultBinary.into()
     }
 }

@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     request_header::RequestHeader,
 };
 
@@ -78,5 +79,9 @@ impl BinaryEncoder<ModifySubscriptionRequest> for ModifySubscriptionRequest {
             max_notifications_per_publish,
             priority,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ModifySubscriptionRequest_Encoding_DefaultBinary.into()
     }
 }

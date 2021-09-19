@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
 };
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -102,5 +103,9 @@ impl BinaryEncoder<ServerDiagnosticsSummaryDataType> for ServerDiagnosticsSummar
             security_rejected_requests_count,
             rejected_requests_count,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ServerDiagnosticsSummaryDataType_Encoding_DefaultBinary.into()
     }
 }

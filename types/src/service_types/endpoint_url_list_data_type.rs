@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
 };
 
@@ -48,5 +49,9 @@ impl BinaryEncoder<EndpointUrlListDataType> for EndpointUrlListDataType {
         Ok(EndpointUrlListDataType {
             endpoint_url_list,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::EndpointUrlListDataType_Encoding_DefaultBinary.into()
     }
 }

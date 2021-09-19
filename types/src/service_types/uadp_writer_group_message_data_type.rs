@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     service_types::enums::DataSetOrderingType,
     service_types::enums::UadpNetworkMessageContentMask,
 };
@@ -61,5 +63,9 @@ impl BinaryEncoder<UadpWriterGroupMessageDataType> for UadpWriterGroupMessageDat
             sampling_offset,
             publishing_offset,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::UadpWriterGroupMessageDataType_Encoding_DefaultBinary.into()
     }
 }

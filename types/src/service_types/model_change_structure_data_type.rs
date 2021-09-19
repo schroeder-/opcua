@@ -12,9 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
     node_id::NodeId,
+    service_types::impls::MessageInfo,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -58,5 +58,9 @@ impl BinaryEncoder<ModelChangeStructureDataType> for ModelChangeStructureDataTyp
             affected_type,
             verb,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ModelChangeStructureDataType_Encoding_DefaultBinary.into()
     }
 }

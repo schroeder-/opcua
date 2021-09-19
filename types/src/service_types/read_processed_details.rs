@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    date_time::DateTime,
+    node_ids::ObjectId,
     node_id::NodeId,
+    date_time::DateTime,
     service_types::AggregateConfiguration,
 };
 
@@ -62,5 +63,9 @@ impl BinaryEncoder<ReadProcessedDetails> for ReadProcessedDetails {
             aggregate_type,
             aggregate_configuration,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ReadProcessedDetails_Encoding_DefaultBinary.into()
     }
 }

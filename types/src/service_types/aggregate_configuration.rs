@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -67,5 +68,9 @@ impl BinaryEncoder<AggregateConfiguration> for AggregateConfiguration {
             percent_data_good,
             use_sloped_extrapolation,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::AggregateConfiguration_Encoding_DefaultBinary.into()
     }
 }

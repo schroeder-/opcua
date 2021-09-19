@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -52,5 +53,9 @@ impl BinaryEncoder<XVType> for XVType {
             x,
             value,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::XVType_Encoding_DefaultBinary.into()
     }
 }

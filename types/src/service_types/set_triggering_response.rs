@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     response_header::ResponseHeader,
     status_codes::StatusCode,
     diagnostic_info::DiagnosticInfo,
@@ -70,5 +71,9 @@ impl BinaryEncoder<SetTriggeringResponse> for SetTriggeringResponse {
             remove_results,
             remove_diagnostic_infos,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::SetTriggeringResponse_Encoding_DefaultBinary.into()
     }
 }

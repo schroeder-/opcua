@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     service_types::PublishedDataSetDataType,
     service_types::PubSubConnectionDataType,
 };
@@ -59,5 +60,9 @@ impl BinaryEncoder<PubSubConfigurationDataType> for PubSubConfigurationDataType 
             connections,
             enabled,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::PubSubConfigurationDataType_Encoding_DefaultBinary.into()
     }
 }

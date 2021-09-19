@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     data_value::DataValue,
     service_types::ModificationInfo,
 };
@@ -46,5 +48,9 @@ impl BinaryEncoder<HistoryModifiedData> for HistoryModifiedData {
             data_values,
             modification_infos,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::HistoryModifiedData_Encoding_DefaultBinary.into()
     }
 }

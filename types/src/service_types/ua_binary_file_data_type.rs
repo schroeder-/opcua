@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     string::UAString,
     variant::Variant,
     service_types::StructureDescription,
@@ -75,5 +77,9 @@ impl BinaryEncoder<UABinaryFileDataType> for UABinaryFileDataType {
             file_header,
             body,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::UABinaryFileDataType_Encoding_DefaultBinary.into()
     }
 }

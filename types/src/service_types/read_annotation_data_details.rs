@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     date_time::DateTime,
 };
 
@@ -40,5 +42,9 @@ impl BinaryEncoder<ReadAnnotationDataDetails> for ReadAnnotationDataDetails {
         Ok(ReadAnnotationDataDetails {
             req_times,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ReadAnnotationDataDetails_Encoding_DefaultBinary.into()
     }
 }

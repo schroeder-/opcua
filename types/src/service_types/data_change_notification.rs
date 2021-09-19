@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     diagnostic_info::DiagnosticInfo,
     service_types::MonitoredItemNotification,
 };
@@ -46,5 +48,9 @@ impl BinaryEncoder<DataChangeNotification> for DataChangeNotification {
             monitored_items,
             diagnostic_infos,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::DataChangeNotification_Encoding_DefaultBinary.into()
     }
 }

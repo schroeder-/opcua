@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     request_header::RequestHeader,
     extension_object::ExtensionObject,
     service_types::enums::TimestampsToReturn,
@@ -71,5 +72,9 @@ impl BinaryEncoder<HistoryReadRequest> for HistoryReadRequest {
             release_continuation_points,
             nodes_to_read,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::HistoryReadRequest_Encoding_DefaultBinary.into()
     }
 }

@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     request_header::RequestHeader,
     service_types::ViewDescription,
     service_types::BrowseDescription,
@@ -65,5 +66,9 @@ impl BinaryEncoder<BrowseRequest> for BrowseRequest {
             requested_max_references_per_node,
             nodes_to_browse,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::BrowseRequest_Encoding_DefaultBinary.into()
     }
 }

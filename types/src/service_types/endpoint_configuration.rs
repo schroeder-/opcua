@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -87,5 +88,9 @@ impl BinaryEncoder<EndpointConfiguration> for EndpointConfiguration {
             channel_lifetime,
             security_token_lifetime,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::EndpointConfiguration_Encoding_DefaultBinary.into()
     }
 }

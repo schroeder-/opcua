@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     localized_text::LocalizedText,
     service_types::enums::ApplicationType,
@@ -85,5 +86,9 @@ impl BinaryEncoder<RegisteredServer> for RegisteredServer {
             semaphore_file_path,
             is_online,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::RegisteredServer_Encoding_DefaultBinary.into()
     }
 }

@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     localized_text::LocalizedText,
     service_types::enums::ApplicationType,
@@ -80,5 +81,9 @@ impl BinaryEncoder<ApplicationDescription> for ApplicationDescription {
             discovery_profile_uri,
             discovery_urls,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ApplicationDescription_Encoding_DefaultBinary.into()
     }
 }

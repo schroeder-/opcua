@@ -13,7 +13,7 @@ use std::{
 use byteorder::{ByteOrder, LittleEndian, WriteBytesExt};
 use chrono::Duration;
 
-use crate::{constants, status_codes::StatusCode};
+use crate::{constants, status_codes::StatusCode, NodeId};
 
 pub type EncodingResult<T> = std::result::Result<T, StatusCode>;
 
@@ -78,6 +78,10 @@ pub trait BinaryEncoder<T> {
         let mut buffer = Cursor::new(Vec::with_capacity(self.byte_len()));
         let _ = self.encode(&mut buffer);
         buffer.into_inner()
+    }
+    // Returns the typeid used to encode/decode via ExtensionObject
+    fn type_id() -> NodeId {
+        NodeId::null()
     }
 }
 

@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     service_types::SimpleAttributeOperand,
     service_types::ContentFilter,
 };
@@ -46,5 +48,9 @@ impl BinaryEncoder<EventFilter> for EventFilter {
             select_clauses,
             where_clause,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::EventFilter_Encoding_DefaultBinary.into()
     }
 }

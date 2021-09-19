@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     variant::Variant,
 };
 
@@ -48,5 +49,9 @@ impl BinaryEncoder<HistoryEventFieldList> for HistoryEventFieldList {
         Ok(HistoryEventFieldList {
             event_fields,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::HistoryEventFieldList_Encoding_DefaultBinary.into()
     }
 }

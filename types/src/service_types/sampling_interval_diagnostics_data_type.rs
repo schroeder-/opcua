@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -62,5 +63,9 @@ impl BinaryEncoder<SamplingIntervalDiagnosticsDataType> for SamplingIntervalDiag
             max_monitored_item_count,
             disabled_monitored_item_count,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::SamplingIntervalDiagnosticsDataType_Encoding_DefaultBinary.into()
     }
 }

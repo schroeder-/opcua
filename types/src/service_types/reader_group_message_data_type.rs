@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -40,5 +41,9 @@ impl BinaryEncoder<ReaderGroupMessageDataType> for ReaderGroupMessageDataType {
     fn decode<S: Read>(stream: &mut S, decoding_options: &DecodingOptions) -> EncodingResult<Self> {
         Ok(ReaderGroupMessageDataType {
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ReaderGroupMessageDataType_Encoding_DefaultBinary.into()
     }
 }

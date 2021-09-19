@@ -12,9 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
     node_id::NodeId,
+    service_types::impls::MessageInfo,
     date_time::DateTime,
 };
 
@@ -59,5 +59,9 @@ impl BinaryEncoder<ViewDescription> for ViewDescription {
             timestamp,
             view_version,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ViewDescription_Encoding_DefaultBinary.into()
     }
 }

@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     variant::Variant,
     service_types::enums::DataSetFieldContentMask,
@@ -135,5 +136,9 @@ impl BinaryEncoder<DataSetReaderDataType> for DataSetReaderDataType {
             message_settings,
             subscribed_data_set,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::DataSetReaderDataType_Encoding_DefaultBinary.into()
     }
 }

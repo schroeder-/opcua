@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     request_header::RequestHeader,
     extension_object::ExtensionObject,
     service_types::RegisteredServer,
@@ -60,5 +61,9 @@ impl BinaryEncoder<RegisterServer2Request> for RegisterServer2Request {
             server,
             discovery_configuration,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::RegisterServer2Request_Encoding_DefaultBinary.into()
     }
 }

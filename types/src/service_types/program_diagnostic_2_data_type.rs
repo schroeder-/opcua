@@ -12,9 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
     node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     date_time::DateTime,
     variant::Variant,
@@ -108,5 +108,9 @@ impl BinaryEncoder<ProgramDiagnostic2DataType> for ProgramDiagnostic2DataType {
             last_method_call_time,
             last_method_return_status,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ProgramDiagnostic2DataType_Encoding_DefaultBinary.into()
     }
 }

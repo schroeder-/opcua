@@ -12,9 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
     node_id::NodeId,
+    service_types::impls::MessageInfo,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -198,5 +198,9 @@ impl BinaryEncoder<SubscriptionDiagnosticsDataType> for SubscriptionDiagnosticsD
             next_sequence_number,
             event_queue_over_flow_count,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::SubscriptionDiagnosticsDataType_Encoding_DefaultBinary.into()
     }
 }

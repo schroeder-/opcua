@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     request_header::RequestHeader,
     string::UAString,
     byte_string::ByteString,
@@ -91,5 +92,9 @@ impl BinaryEncoder<CreateSessionRequest> for CreateSessionRequest {
             requested_session_timeout,
             max_response_message_size,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::CreateSessionRequest_Encoding_DefaultBinary.into()
     }
 }

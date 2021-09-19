@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     byte_string::ByteString,
 };
 
@@ -53,5 +54,9 @@ impl BinaryEncoder<DecimalDataType> for DecimalDataType {
             scale,
             value,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::DecimalDataType_Encoding_DefaultBinary.into()
     }
 }

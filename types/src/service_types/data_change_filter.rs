@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     service_types::enums::DataChangeTrigger,
 };
 
@@ -50,5 +52,9 @@ impl BinaryEncoder<DataChangeFilter> for DataChangeFilter {
             deadband_type,
             deadband_value,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::DataChangeFilter_Encoding_DefaultBinary.into()
     }
 }

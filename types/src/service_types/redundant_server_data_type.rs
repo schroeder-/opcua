@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     service_types::enums::ServerState,
 };
@@ -59,5 +60,9 @@ impl BinaryEncoder<RedundantServerDataType> for RedundantServerDataType {
             service_level,
             server_state,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::RedundantServerDataType_Encoding_DefaultBinary.into()
     }
 }

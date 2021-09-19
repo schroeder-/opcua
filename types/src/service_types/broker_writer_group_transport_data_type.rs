@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     string::UAString,
     service_types::enums::BrokerTransportQualityOfService,
 };
@@ -56,5 +58,9 @@ impl BinaryEncoder<BrokerWriterGroupTransportDataType> for BrokerWriterGroupTran
             authentication_profile_uri,
             requested_delivery_guarantee,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::BrokerWriterGroupTransportDataType_Encoding_DefaultBinary.into()
     }
 }

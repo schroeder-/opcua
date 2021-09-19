@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     string::UAString,
     service_types::enums::MessageSecurityMode,
     extension_object::ExtensionObject,
@@ -120,5 +122,9 @@ impl BinaryEncoder<WriterGroupDataType> for WriterGroupDataType {
             message_settings,
             data_set_writers,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::WriterGroupDataType_Encoding_DefaultBinary.into()
     }
 }

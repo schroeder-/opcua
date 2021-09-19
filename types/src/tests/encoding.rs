@@ -481,3 +481,23 @@ fn argument() {
         description: LocalizedText::new("foo", "bar"),
     });
 }
+
+#[test]
+fn extension_object_from_datatype() -> Result<(), StatusCode> {
+    let add = AdditionalParametersType {
+        parameters: Some(vec![KeyValuePair {
+            key: "foo".into(),
+            value: "bar".into(),
+        }]),
+    };
+    let eoj = ExtensionObject::encode_from(&add);
+    let oid = eoj.object_id().unwrap();
+    assert_eq!(
+        oid,
+        ObjectId::AdditionalParametersType_Encoding_DefaultBinary
+    );
+    let eoj = serialize_test_and_return(eoj);
+    let add2 = eoj.decode_to()?;
+    assert_eq!(add, add2);
+    Ok(())
+}

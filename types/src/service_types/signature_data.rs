@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     byte_string::ByteString,
 };
@@ -54,5 +55,9 @@ impl BinaryEncoder<SignatureData> for SignatureData {
             algorithm,
             signature,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::SignatureData_Encoding_DefaultBinary.into()
     }
 }

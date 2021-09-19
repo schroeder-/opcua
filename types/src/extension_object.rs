@@ -5,6 +5,7 @@
 //! Contains the implementation of `ExtensionObject`.
 
 use std::{
+    convert::Into,
     error::Error,
     fmt,
     io::{Cursor, Read, Write},
@@ -130,6 +131,26 @@ impl ExtensionObject {
             .map_err(|_| ExtensionObjectError)
     }
 
+    /// Generates an ExtensionObject from a struct implementing which implements
+    /// binary encoder.
+    pub fn encode_from<T>(binary: &T) -> ExtensionObject
+    where
+        T: BinaryEncoder<T>,
+    {
+        Self::from_encodable(T::type_id(), binary)
+    }
+
+    /// Decodes an ExtensionObject into a struct implementing binary encoder
+    pub fn decode_to<T>(&self) -> EncodingResult<T>
+    where
+        T: BinaryEncoder<T>,
+    {
+        if self.node_id == T::type_id() {
+            self.decode_inner(&DecodingOptions::default())
+        } else {
+            Err(StatusCode::BadTypeMismatch)
+        }
+    }
     /// Creates an extension object with the specified node id and the encodable object as its payload.
     /// The body is set to a byte string containing the encoded struct.
     pub fn from_encodable<N, T>(node_id: N, encodable: &T) -> ExtensionObject

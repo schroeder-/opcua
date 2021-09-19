@@ -12,9 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
     node_id::NodeId,
+    service_types::impls::MessageInfo,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -53,5 +53,9 @@ impl BinaryEncoder<SemanticChangeStructureDataType> for SemanticChangeStructureD
             affected,
             affected_type,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::SemanticChangeStructureDataType_Encoding_DefaultBinary.into()
     }
 }

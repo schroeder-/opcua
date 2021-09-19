@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     service_types::PublishedVariableDataType,
 };
 
@@ -40,5 +42,9 @@ impl BinaryEncoder<PublishedDataItemsDataType> for PublishedDataItemsDataType {
         Ok(PublishedDataItemsDataType {
             published_data,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::PublishedDataItemsDataType_Encoding_DefaultBinary.into()
     }
 }

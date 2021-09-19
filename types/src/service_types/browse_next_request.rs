@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     request_header::RequestHeader,
     byte_string::ByteString,
 };
@@ -59,5 +60,9 @@ impl BinaryEncoder<BrowseNextRequest> for BrowseNextRequest {
             release_continuation_points,
             continuation_points,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::BrowseNextRequest_Encoding_DefaultBinary.into()
     }
 }

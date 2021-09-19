@@ -12,6 +12,7 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
     node_id::NodeId,
     service_types::enums::StructureType,
     service_types::StructureField,
@@ -57,5 +58,9 @@ impl BinaryEncoder<StructureDefinition> for StructureDefinition {
             structure_type,
             fields,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::StructureDefinition_Encoding_DefaultBinary.into()
     }
 }

@@ -12,6 +12,7 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
     node_id::NodeId,
     date_time::DateTime,
 };
@@ -46,5 +47,9 @@ impl BinaryEncoder<DeleteAtTimeDetails> for DeleteAtTimeDetails {
             node_id,
             req_times,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::DeleteAtTimeDetails_Encoding_DefaultBinary.into()
     }
 }

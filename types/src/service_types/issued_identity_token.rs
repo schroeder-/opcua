@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     string::UAString,
     byte_string::ByteString,
 };
@@ -51,5 +53,9 @@ impl BinaryEncoder<IssuedIdentityToken> for IssuedIdentityToken {
             token_data,
             encryption_algorithm,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::IssuedIdentityToken_Encoding_DefaultBinary.into()
     }
 }

@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     service_types::enums::IdentityCriteriaType,
     string::UAString,
 };
@@ -54,5 +55,9 @@ impl BinaryEncoder<IdentityMappingRuleType> for IdentityMappingRuleType {
             criteria_type,
             criteria,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::IdentityMappingRuleType_Encoding_DefaultBinary.into()
     }
 }

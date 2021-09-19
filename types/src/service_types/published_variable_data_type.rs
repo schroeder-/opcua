@@ -12,9 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
     node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     variant::Variant,
     qualified_name::QualifiedName,
@@ -86,5 +86,9 @@ impl BinaryEncoder<PublishedVariableDataType> for PublishedVariableDataType {
             substitute_value,
             meta_data_properties,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::PublishedVariableDataType_Encoding_DefaultBinary.into()
     }
 }

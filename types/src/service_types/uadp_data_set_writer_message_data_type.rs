@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     service_types::enums::UadpDataSetMessageContentMask,
 };
 
@@ -55,5 +57,9 @@ impl BinaryEncoder<UadpDataSetWriterMessageDataType> for UadpDataSetWriterMessag
             network_message_number,
             data_set_offset,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::UadpDataSetWriterMessageDataType_Encoding_DefaultBinary.into()
     }
 }

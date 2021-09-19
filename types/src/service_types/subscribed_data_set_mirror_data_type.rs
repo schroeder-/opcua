@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     string::UAString,
     service_types::RolePermissionType,
 };
@@ -46,5 +48,9 @@ impl BinaryEncoder<SubscribedDataSetMirrorDataType> for SubscribedDataSetMirrorD
             parent_node_name,
             role_permissions,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::SubscribedDataSetMirrorDataType_Encoding_DefaultBinary.into()
     }
 }

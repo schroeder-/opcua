@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     request_header::RequestHeader,
     extension_object::ExtensionObject,
 };
@@ -54,5 +55,9 @@ impl BinaryEncoder<HistoryUpdateRequest> for HistoryUpdateRequest {
             request_header,
             history_update_details,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::HistoryUpdateRequest_Encoding_DefaultBinary.into()
     }
 }

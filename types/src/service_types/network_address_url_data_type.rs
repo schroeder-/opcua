@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     string::UAString,
 };
 
@@ -45,5 +47,9 @@ impl BinaryEncoder<NetworkAddressUrlDataType> for NetworkAddressUrlDataType {
             network_interface,
             url,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::NetworkAddressUrlDataType_Encoding_DefaultBinary.into()
     }
 }

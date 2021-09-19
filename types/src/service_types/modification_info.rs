@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     date_time::DateTime,
     service_types::enums::HistoryUpdateType,
     string::UAString,
@@ -60,5 +61,9 @@ impl BinaryEncoder<ModificationInfo> for ModificationInfo {
             update_type,
             user_name,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ModificationInfo_Encoding_DefaultBinary.into()
     }
 }

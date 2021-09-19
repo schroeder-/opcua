@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     localized_text::LocalizedText,
 };
 
@@ -70,5 +72,9 @@ impl BinaryEncoder<ViewAttributes> for ViewAttributes {
             contains_no_loops,
             event_notifier,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ViewAttributes_Encoding_DefaultBinary.into()
     }
 }

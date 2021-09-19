@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     response_header::ResponseHeader,
 };
 
@@ -53,5 +54,9 @@ impl BinaryEncoder<CancelResponse> for CancelResponse {
             response_header,
             cancel_count,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::CancelResponse_Encoding_DefaultBinary.into()
     }
 }

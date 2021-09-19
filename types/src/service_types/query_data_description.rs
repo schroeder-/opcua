@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     service_types::RelativePath,
 };
@@ -59,5 +60,9 @@ impl BinaryEncoder<QueryDataDescription> for QueryDataDescription {
             attribute_id,
             index_range,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::QueryDataDescription_Encoding_DefaultBinary.into()
     }
 }

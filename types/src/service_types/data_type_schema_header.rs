@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     service_types::StructureDescription,
     service_types::EnumDescription,
@@ -66,5 +67,9 @@ impl BinaryEncoder<DataTypeSchemaHeader> for DataTypeSchemaHeader {
             enum_data_types,
             simple_data_types,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::DataTypeSchemaHeader_Encoding_DefaultBinary.into()
     }
 }

@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     service_types::enums::UserTokenType,
 };
@@ -69,5 +70,9 @@ impl BinaryEncoder<UserTokenPolicy> for UserTokenPolicy {
             issuer_endpoint_url,
             security_policy_uri,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::UserTokenPolicy_Encoding_DefaultBinary.into()
     }
 }

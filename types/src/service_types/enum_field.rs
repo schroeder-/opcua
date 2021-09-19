@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     localized_text::LocalizedText,
     string::UAString,
 };
@@ -56,5 +58,9 @@ impl BinaryEncoder<EnumField> for EnumField {
             description,
             name,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::EnumField_Encoding_DefaultBinary.into()
     }
 }

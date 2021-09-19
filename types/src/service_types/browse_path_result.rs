@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     status_codes::StatusCode,
     service_types::BrowsePathTarget,
 };
@@ -54,5 +55,9 @@ impl BinaryEncoder<BrowsePathResult> for BrowsePathResult {
             status_code,
             targets,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::BrowsePathResult_Encoding_DefaultBinary.into()
     }
 }

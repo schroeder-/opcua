@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     response_header::ResponseHeader,
     diagnostic_info::DiagnosticInfo,
     service_types::TransferResult,
@@ -60,5 +61,9 @@ impl BinaryEncoder<TransferSubscriptionsResponse> for TransferSubscriptionsRespo
             results,
             diagnostic_infos,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::TransferSubscriptionsResponse_Encoding_DefaultBinary.into()
     }
 }

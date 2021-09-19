@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     localized_text::LocalizedText,
 };
@@ -64,5 +65,9 @@ impl BinaryEncoder<CurrencyUnitType> for CurrencyUnitType {
             alphabetic_code,
             currency,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::CurrencyUnitType_Encoding_DefaultBinary.into()
     }
 }

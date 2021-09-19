@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     service_types::enums::MessageSecurityMode,
     service_types::EndpointDescription,
@@ -81,5 +82,9 @@ impl BinaryEncoder<PubSubGroupDataType> for PubSubGroupDataType {
             max_network_message_size,
             group_properties,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::PubSubGroupDataType_Encoding_DefaultBinary.into()
     }
 }

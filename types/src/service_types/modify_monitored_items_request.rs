@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     request_header::RequestHeader,
     service_types::enums::TimestampsToReturn,
     service_types::MonitoredItemModifyRequest,
@@ -65,5 +66,9 @@ impl BinaryEncoder<ModifyMonitoredItemsRequest> for ModifyMonitoredItemsRequest 
             timestamps_to_return,
             items_to_modify,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ModifyMonitoredItemsRequest_Encoding_DefaultBinary.into()
     }
 }

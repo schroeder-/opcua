@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     service_types::ThreeDCartesianCoordinates,
     service_types::ThreeDOrientation,
 };
@@ -46,5 +48,9 @@ impl BinaryEncoder<ThreeDFrame> for ThreeDFrame {
             cartesian_coordinates,
             orientation,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ThreeDFrame_Encoding_DefaultBinary.into()
     }
 }

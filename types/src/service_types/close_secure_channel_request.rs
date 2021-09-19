@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     request_header::RequestHeader,
 };
 
@@ -48,5 +49,9 @@ impl BinaryEncoder<CloseSecureChannelRequest> for CloseSecureChannelRequest {
         Ok(CloseSecureChannelRequest {
             request_header,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::CloseSecureChannelRequest_Encoding_DefaultBinary.into()
     }
 }

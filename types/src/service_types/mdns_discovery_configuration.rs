@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     string::UAString,
 };
 
@@ -45,5 +47,9 @@ impl BinaryEncoder<MdnsDiscoveryConfiguration> for MdnsDiscoveryConfiguration {
             mdns_server_name,
             server_capabilities,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::MdnsDiscoveryConfiguration_Encoding_DefaultBinary.into()
     }
 }

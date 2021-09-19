@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -52,5 +53,9 @@ impl BinaryEncoder<TimeZoneDataType> for TimeZoneDataType {
             offset,
             daylight_saving_in_offset,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::TimeZoneDataType_Encoding_DefaultBinary.into()
     }
 }

@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     string::UAString,
     date_time::DateTime,
 };
@@ -59,5 +60,9 @@ impl BinaryEncoder<Annotation> for Annotation {
             user_name,
             annotation_time,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::Annotation_Encoding_DefaultBinary.into()
     }
 }

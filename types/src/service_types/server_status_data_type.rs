@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     date_time::DateTime,
     service_types::enums::ServerState,
     localized_text::LocalizedText,
@@ -76,5 +77,9 @@ impl BinaryEncoder<ServerStatusDataType> for ServerStatusDataType {
             seconds_till_shutdown,
             shutdown_reason,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ServerStatusDataType_Encoding_DefaultBinary.into()
     }
 }

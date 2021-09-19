@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     localized_text::LocalizedText,
     service_types::enums::AxisScaleEnumeration,
     service_types::EUInformation,
@@ -71,5 +72,9 @@ impl BinaryEncoder<AxisInformation> for AxisInformation {
             axis_scale_type,
             axis_steps,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::AxisInformation_Encoding_DefaultBinary.into()
     }
 }

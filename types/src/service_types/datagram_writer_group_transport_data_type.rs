@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -44,5 +46,9 @@ impl BinaryEncoder<DatagramWriterGroupTransportDataType> for DatagramWriterGroup
             message_repeat_count,
             message_repeat_delay,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::DatagramWriterGroupTransportDataType_Encoding_DefaultBinary.into()
     }
 }

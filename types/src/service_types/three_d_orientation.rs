@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -49,5 +51,9 @@ impl BinaryEncoder<ThreeDOrientation> for ThreeDOrientation {
             b,
             c,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::ThreeDOrientation_Encoding_DefaultBinary.into()
     }
 }

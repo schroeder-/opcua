@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     service_types::enums::JsonNetworkMessageContentMask,
 };
 
@@ -40,5 +42,9 @@ impl BinaryEncoder<JsonWriterGroupMessageDataType> for JsonWriterGroupMessageDat
         Ok(JsonWriterGroupMessageDataType {
             network_message_content_mask,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::JsonWriterGroupMessageDataType_Encoding_DefaultBinary.into()
     }
 }

@@ -12,8 +12,9 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
-    service_types::impls::MessageInfo,
     node_ids::ObjectId,
+    node_id::NodeId,
+    service_types::impls::MessageInfo,
     data_value::DataValue,
 };
 
@@ -53,5 +54,9 @@ impl BinaryEncoder<MonitoredItemNotification> for MonitoredItemNotification {
             client_handle,
             value,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::MonitoredItemNotification_Encoding_DefaultBinary.into()
     }
 }

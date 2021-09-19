@@ -12,6 +12,8 @@ use std::io::{Read, Write};
 use crate::{
     encoding::*,
     basic_types::*,
+    node_ids::ObjectId,
+    node_id::NodeId,
     service_types::EventFieldList,
 };
 
@@ -40,5 +42,9 @@ impl BinaryEncoder<EventNotificationList> for EventNotificationList {
         Ok(EventNotificationList {
             events,
         })
+    }
+
+    fn type_id() -> NodeId {
+        ObjectId::EventNotificationList_Encoding_DefaultBinary.into()
     }
 }
