@@ -210,19 +210,20 @@ impl Client {
         } else {
             self.new_session(&endpoints).unwrap()
         };
-
-        {
-            // Connect to the server
+        let result = {
             let mut session = session.write().unwrap();
-            if let Err(result) = session.connect_and_activate() {
-                error!(
-                    "Got an error while creating the default session - {}",
-                    result
-                );
-            }
+            // Connect to the server
+            session.connect_and_activate()
+        };
+        if let Err(result) = result {
+            error!(
+                "Got an error while creating the default session - {}",
+                result
+            );
+            Err(result)
+        } else {
+            Ok(session)
         }
-
-        Ok(session)
     }
 
     /// Connects to an ad-hoc server endpoint description. and creates / activates a [`Session`] for
@@ -279,18 +280,20 @@ impl Client {
             .new_session_from_info((server_endpoint, user_identity_token))
             .unwrap();
 
-        {
-            // Connect to the server
+        let result = {
             let mut session = session.write().unwrap();
-            if let Err(result) = session.connect_and_activate() {
-                error!(
-                    "Got an error while creating the default session - {}",
-                    result
-                );
-            }
+            // Connect to the server
+            session.connect_and_activate()
+        };
+        if let Err(result) = result {
+            error!(
+                "Got an error while creating the default session - {}",
+                result
+            );
+            Err(result)
+        } else {
+            Ok(session)
         }
-
-        Ok(session)
     }
 
     /// Gets the [`ClientEndpoint`] information for the default endpoint, as defined
