@@ -1,14 +1,19 @@
 // OPCUA for Rust
 // SPDX-License-Identifier: MPL-2.0
-// Copyright (C) 2017-2020 Adam Lock
+// Copyright (C) 2017-2022 Adam Lock
 
 //! A sample method
 
-use opcua_server::{address_space::method::MethodBuilder, callbacks, prelude::*, session::Session};
+use std::sync::Arc;
+
+use opcua::server::{
+    address_space::method::MethodBuilder, callbacks, prelude::*, session::SessionManager,
+};
+use opcua::sync::RwLock;
 
 pub fn add_methods(server: &mut Server, ns: u16) {
     let address_space = server.address_space();
-    let mut address_space = address_space.write().unwrap();
+    let mut address_space = address_space.write();
 
     let object_id = NodeId::new(ns, "Functions");
     ObjectBuilder::new(&object_id, "Functions", "Functions")
@@ -48,7 +53,7 @@ pub fn add_methods(server: &mut Server, ns: u16) {
     MethodBuilder::new(&fn_node_id, "Boop", "Boop")
         .component_of(object_id.clone())
         .input_args(&mut address_space, &[("Ping", DataTypeId::String).into()])
-        .callback(Box::new(HelloX))
+        .callback(Box::new(Boop))
         .insert(&mut address_space);
 }
 
@@ -57,7 +62,8 @@ struct NoOp;
 impl callbacks::Method for NoOp {
     fn call(
         &mut self,
-        _session: &mut Session,
+        _session_id: &NodeId,
+        _session_map: Arc<RwLock<SessionManager>>,
         _request: &CallMethodRequest,
     ) -> Result<CallMethodResult, StatusCode> {
         debug!("NoOp method called");
@@ -75,7 +81,8 @@ struct Boop;
 impl callbacks::Method for Boop {
     fn call(
         &mut self,
-        _session: &mut Session,
+        _session_id: &NodeId,
+        _session_map: Arc<RwLock<SessionManager>>,
         request: &CallMethodRequest,
     ) -> Result<CallMethodResult, StatusCode> {
         // Validate input to be a string
@@ -117,7 +124,8 @@ struct HelloWorld;
 impl callbacks::Method for HelloWorld {
     fn call(
         &mut self,
-        _session: &mut Session,
+        _session_id: &NodeId,
+        _session_map: Arc<RwLock<SessionManager>>,
         _request: &CallMethodRequest,
     ) -> Result<CallMethodResult, StatusCode> {
         debug!("HelloWorld method called");
@@ -136,7 +144,8 @@ struct HelloX;
 impl callbacks::Method for HelloX {
     fn call(
         &mut self,
-        _session: &mut Session,
+        _session_id: &NodeId,
+        _session_map: Arc<RwLock<SessionManager>>,
         request: &CallMethodRequest,
     ) -> Result<CallMethodResult, StatusCode> {
         debug!("HelloX method called");

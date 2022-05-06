@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use opcua_crypto::*;
+use opcua::crypto::*;
 
 fn main() {
     if let Ok((x509_data, overwrite, pki_path, cert_path, pkey_path)) = parse_x509_args() {
@@ -174,7 +174,7 @@ const DEFAULT_O: &str = "OPC UA for Rust";
 const DEFAULT_OU: &str = "Certificate Creator";
 const DEFAULT_C: &str = "IE";
 const DEFAULT_ST: &str = "Dublin";
-const DEFAULT_CERT_PATH: &str = "certificate.der";
+const DEFAULT_CERT_PATH: &str = "cert.der";
 const DEFAULT_PKEY_PATH: &str = "private.pem";
 
 fn parse_x509_args() -> Result<(X509Data, bool, PathBuf, PathBuf, PathBuf), ()> {
